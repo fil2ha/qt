@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import clients2, products, stores, personal, spis, replac, buy, sold
+import clients2, products, stores, personal, spis, replac, buy, sell
 import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
@@ -180,10 +180,11 @@ class Ui_MainWindow(object):
         self.window.show()
 
     def show_post(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = sold.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        self.ui = sell.Ui_Dialog()
+        data = self.ui.exec_()
+        line_text = self.lineEdit_2.text()
+        line_text += data
+        self.lineEdit_2.setText(line_text)
 
 
     def database1(self):
