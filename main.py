@@ -1,9 +1,25 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import clients2, products, stores, personal, spis, replac, buy, sell
 import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
+
+
+class TransactionDialog(QtWidgets.QDialog):
+    def __init__(self, transaction_data, headers, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Детали транзакции")
+        self.setGeometry(300, 300, 400, 300)
+
+        layout = QtWidgets.QVBoxLayout()
+
+        for header, data in zip(headers, transaction_data):
+            label = QtWidgets.QLabel(f"{header}: {data}")
+            layout.addWidget(label)
+
+        self.setLayout(layout)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -117,7 +133,7 @@ class Ui_MainWindow(object):
         self.pushButton_post.clicked.connect(self.show_post)
         self.pushButton_exit.clicked.connect(MainWindow.close)
         self.database1()
-
+        self.tableWidget.cellClicked.connect(self.show_transaction_details)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -208,6 +224,20 @@ class Ui_MainWindow(object):
             for i in range(len(table_data)):
                 for j in range(len(table_data[i])):
                     self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
+
+    def show_transaction_details(self, row, column):
+        transaction_data = []
+        headers = []
+        for col in range(self.tableWidget.columnCount()):
+            item = self.tableWidget.item(row, col)
+            header_item = self.tableWidget.horizontalHeaderItem(col)
+            if item and header_item:
+                transaction_data.append(item.text())
+                headers.append(header_item.text())
+
+        self.dialog = TransactionDialog(transaction_data, headers)
+        self.dialog.exec_()
+
 
 
 if __name__ == "__main__":
