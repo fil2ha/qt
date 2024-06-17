@@ -50,22 +50,41 @@ class DataBase():
         self.cursor.execute(f"""
                                     UPDATE GoodsWarehouse 
                                     SET count = count + ?
-                                    WHERE id IN (
-                                    SELECT id FROM Goods 
-                                    WHERE name = ? AND ex_time = ?
-                                )""", (cnt, name, ex_time))
+                                    WHERE id IN 
+                                    (
+                                        SELECT id FROM Goods 
+                                        WHERE name = ? AND ex_time = ?
+                                    )
+                                """, (cnt, name, ex_time))
         self.connection.commit()
 
 
-    # функция для добавления транзакции
+    # функция для добавления транзакции и возвращегия id этой транзакции
     def insert_transact(self, list):
-        pass
+        self.cursor.execute("INSERT INTO Transactions (type, who, time, PS) VALUES (?, ?, ?, ?)", list)
+        self.connection.commit()
+        self.cursor.execute("SELECT id  FROM Transactions WHERE type = ? AND who = ? AND time = ? AND PS = ?", (list[0], list[1],list[2], list[3],))
+        return self.cursor.lastrowid #получает последний id
 
-
+    #функция, которая возвращает имена складов
+    def get_wh_names(self):
+        self.cursor.execute( "SELECT name FROM Warehouse")
+        temp = []
+        temp_list = self.cursor.fetchall()
+        for _ in temp_list:
+            for __ in _:
+                if __ in temp:
+                    continue
+                else:
+                    temp.append(__)
+        return temp
 
 db = DataBase()
 
-print(db.get_transactions())
+
+
+print('')
+
 
 
 
