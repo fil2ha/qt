@@ -138,6 +138,8 @@ class Ui_MainWindow(object):
         operations = "Продажа"
 
         generate_document(operations)
+        # Устанавливаем текст в lineEdit_2
+        self.lineEdit_2.setText(f"Проведена {operations}")
 
     # def open_documents(self):
     #
@@ -210,7 +212,7 @@ class Ui_MainWindow(object):
         self.window.show()
 
     def database1(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
+        con = sqlite3.connect('srm.db', check_same_thread=False)
         table_name = 'Transactions'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
