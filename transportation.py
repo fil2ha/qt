@@ -35,18 +35,18 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton = QtWidgets.QPushButton(self)
         self.pushButton.setGeometry(QtCore.QRect(20, 670, 171, 51))
         self.pushButton.setObjectName("pushButton")
-        self.lineEdit = QtWidgets.QLineEdit(self)
-        self.lineEdit.setGeometry(QtCore.QRect(760, 680, 181, 41))
-        self.lineEdit.setObjectName("lineEdit")
-        self.label_3 = QtWidgets.QLabel(self)
-        self.label_3.setGeometry(QtCore.QRect(550, 680, 201, 41))
-        self.label_3.setObjectName("label_3")
-        self.label_4 = QtWidgets.QLabel(self)
-        self.label_4.setGeometry(QtCore.QRect(20, 760, 151, 41))
-        self.label_4.setObjectName("label_4")
-        self.comboBox = QtWidgets.QComboBox(self)
-        self.comboBox.setGeometry(QtCore.QRect(180, 761, 261, 31))
-        self.comboBox.setObjectName("comboBox")
+        # self.lineEdit = QtWidgets.QLineEdit(self)
+        # self.lineEdit.setGeometry(QtCore.QRect(760, 680, 181, 41))
+        # self.lineEdit.setObjectName("lineEdit")
+        # self.label_3 = QtWidgets.QLabel(self)
+        # self.label_3.setGeometry(QtCore.QRect(550, 680, 201, 41))
+        # self.label_3.setObjectName("label_3")
+        # self.label_4 = QtWidgets.QLabel(self)
+        # self.label_4.setGeometry(QtCore.QRect(20, 760, 151, 41))
+        # self.label_4.setObjectName("label_4")
+        # self.comboBox = QtWidgets.QComboBox(self)
+        # self.comboBox.setGeometry(QtCore.QRect(180, 761, 261, 31))
+        # self.comboBox.setObjectName("comboBox")
         self.pushButton_2 = QtWidgets.QPushButton(self)
         self.pushButton_2.setGeometry(QtCore.QRect(270, 830, 221, 51))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -55,11 +55,11 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setObjectName("pushButton_3")
 
         self.table_gen()
-        self.set_combobox_items()
+        # self.set_combobox_items()
 
         self.tableWidget.cellDoubleClicked.connect(self.double_clicked)
 
-        self.tableWidget_2.cellChanged.connect(self.cell_changed)
+        # self.tableWidget_2.cellChanged.connect(self.cell_changed)
 
         self.pushButton.clicked.connect(self.delete_btn)
         self.pushButton_2.clicked.connect(self.close)
@@ -71,19 +71,19 @@ class Ui_Dialog(QtWidgets.QDialog):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.setWindowTitle(_translate("Dialog", "Отпустить"))
+        self.setWindowTitle(_translate("Dialog", "Переместить"))
         self.label.setText(_translate("Dialog", "Выберите продукты из списка:"))
         self.label_2.setText(_translate("Dialog", "Выбранные продукты:"))
         self.pushButton.setText(_translate("Dialog", "Удалить"))
-        self.label_3.setText(_translate("Dialog", "Итоговая сумма"))
-        self.label_4.setText(_translate("Dialog", "Клиент"))
+        # self.label_3.setText(_translate("Dialog", "Итоговая сумма"))
+        # self.label_4.setText(_translate("Dialog", "Ответственный"))
         self.pushButton_2.setText(_translate("Dialog", "Отменить"))
         self.pushButton_3.setText(_translate("Dialog", "Сохранить"))
 
     def table_gen(self):
-        goods_data = [('1234', 'milk', 45, '20240630'), ('5678', 'egg', 12, '20240712')]
-        headers_one = ['articul', 'name', 'price', 'ex_time']
-        headers_two = ['articul', 'name', 'price', 'ex_time', 'quantity']
+        goods_data = [('1234', 'milk', 45, '20240630', 'Warehouse1'), ('5678', 'egg', 12, '20240712', 'Warehouse1')]
+        headers_one = ['articul', 'name', 'price', 'ex_time', 'warehouse']
+        headers_two = ['articul', 'name', 'price', 'ex_time', 'from warehouse 1','to warehouse 2', 'quantity']
 
         self.tableWidget.setColumnCount(len(headers_one))
         self.tableWidget.setRowCount(len(goods_data))
@@ -96,46 +96,57 @@ class Ui_Dialog(QtWidgets.QDialog):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
-    def set_combobox_items(self):
-        combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
-        for i in combobox_items:
-            self.comboBox.addItem(i)
+    # def set_combobox_items(self):
+    #     combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
+    #     for i in combobox_items:
+    #         self.comboBox.addItem(i)
 
     def double_clicked(self, row, column):
+        warehouse_list = ['w1', 'w2', 'w3']
         data_row = self.row_data_from_table1(row)
+        data_row.append('') # warehouse2
         data_row.append('') # quantity
 
         data_lst = self.data_from_table2()
         for data in data_lst:
-            data[4] = ''
+            data[6] = ''
+            data[5] = ''
         if data_row not in data_lst:
             self.tableWidget_2.insertRow(0)
             for col, data in enumerate(data_row):
+                if col == 5:
+                    comboBox = QtWidgets.QComboBox()
+                    for i in warehouse_list:
+                        comboBox.addItem(i)
+                    self.tableWidget_2.setCellWidget(0, col, comboBox)
                 self.tableWidget_2.setItem(0, col, QtWidgets.QTableWidgetItem(str(data)))
 
-    def cell_changed(self, row, column):
-        if column == 4:
-            data_changed_row = self.row_data_from_table2(row)
-            if data_changed_row[4] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
-                self.set_total_sum()
+    # def cell_changed(self, row, column):
+    #     if column == 4:
+    #         data_changed_row = self.row_data_from_table2(row)
+    #         if data_changed_row[6] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
+    #             self.set_total_sum()
+    #             # pass
 
     def delete_btn(self):
         row = self.tableWidget_2.currentRow()
         self.tableWidget_2.removeRow(row)
 
-        self.set_total_sum()
+        # self.set_total_sum()
 
     def save_data(self):
-        self.log_data = 'Проведена операция "Отпустить". '
+        self.log_data = 'Проведена операция "Переместить". '
         self.close()
-
-    def set_total_sum(self):
-        data_lst = self.data_from_table2()
-        sum = 0
-        for data_row in data_lst:
-            if data_row[4] != '':
-                sum += int(data_row[2]) * int(data_row[4])
-        self.lineEdit.setText(str(sum))
+        print(self.data_from_table2())
+    #
+    # def set_total_sum(self):
+    #     data_lst = self.data_from_table2()
+    #     sum = 0
+    #     for data_row in data_lst:
+    #         if data_row[4] != '':
+    #             sum += int(data_row[2]) * int(data_row[6])
+    #     self.lineEdit.setText(str(sum))
+    #
 
     def row_data_from_table1(self, row):
         data_lst = []
@@ -158,8 +169,11 @@ class Ui_Dialog(QtWidgets.QDialog):
         for row in range(self.tableWidget_2.rowCount()):
             data = []
             for col in range(self.tableWidget_2.columnCount()):
-                it = self.tableWidget_2.item(row, col)
-                text = it.text() if it is not None else ""
+                if col == 5:
+                    text = self.tableWidget_2.cellWidget(row, col).currentText()
+                else:
+                    it = self.tableWidget_2.item(row, col)
+                    text = it.text() if it is not None else ""
                 data.append(text)
             lst.append(data)
         return lst
