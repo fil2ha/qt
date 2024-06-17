@@ -1,9 +1,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import clients2, products, stores, personal, spis, replac, buy, sell
-import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
+import os
+import sqlite3  # Не забудьте импортировать sqlite3
+from documents import generate_document  # Импортируем функцию из другого файла
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -26,12 +29,6 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
-
-
-        # self.tableView = QtWidgets.QTableView(self.centralwidget)
-        # self.tableView.setGeometry(QtCore.QRect(30, 150, 1061, 491))
-        # self.tableView.setObjectName("tableView")
-
 
         self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit_2.setGeometry(QtCore.QRect(30, 650, 841, 61))
@@ -116,8 +113,8 @@ class Ui_MainWindow(object):
         self.pushButton_get.clicked.connect(self.show_get)
         self.pushButton_post.clicked.connect(self.show_post)
         self.pushButton_exit.clicked.connect(MainWindow.close)
+        self.pushButton_documents.clicked.connect(self.open_documents)  # Подключаем новую функцию
         self.database1()
-
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -135,19 +132,46 @@ class Ui_MainWindow(object):
         self.pushButton__product.setText(_translate("MainWindow", "ТОВАРЫ"))
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
 
+    def open_documents(self):
+        # Показать диалог выбора операции
+        # operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
+        operations = "Продажа"
+
+        generate_document(operations)
+
+    # def open_documents(self):
+    #
+    #     options = QtWidgets.QFileDialog.Options()
+    #     fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Выберите документ", "", "All Files (*);;Word Files "
+    #                                                                                        "(*.docx);;Excel Files ("
+    #                                                                                        "*.xlsx)", options=options)
+    #     if fileName:
+    #         try:
+    #             os.startfile(fileName)
+    #         except Exception as e:
+    #             print(f"Не удалось открыть файл {fileName}. Ошибка: {e}")
+
+    # def open_documents(self):
+    #     # Показать диалог выбора операции
+    #     operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
+    #     operation, ok = QtWidgets.QInputDialog.getItem(None, "Выберите операцию", "Операция:", operations, 0, False)
+    #     if ok and operation:
+    #         try:
+    #             generate_document(operation)
+    #         except Exception as e:
+    #             QtWidgets.QMessageBox.critical(None, "Ошибка", f"Не удалось создать документ. Ошибка: {e}")
+
     def show_clients(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = clients2.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
 
-
     def show_personal(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = personal.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-
 
     def show_product(self):
         self.window = QtWidgets.QMainWindow()
@@ -180,12 +204,10 @@ class Ui_MainWindow(object):
         self.window.show()
 
     def show_post(self):
-        self.ui = sell.Ui_Dialog()
-        data = self.ui.exec_()
-        line_text = self.lineEdit_2.text()
-        line_text += data
-        self.lineEdit_2.setText(line_text)
-
+        self.window = QtWidgets.QMainWindow()
+        self.ui = sold.Ui_MainWindow()
+        self.ui.setupUi(self.window)
+        self.window.show()
 
     def database1(self):
         con = sqlite3.connect('database.db', check_same_thread=False)
