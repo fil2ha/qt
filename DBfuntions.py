@@ -10,6 +10,11 @@ class DataBase():
         self.cursor.execute("SELECT * FROM Transactions WHERE id = ?", (id,))
         return self.cursor.fetchall()
 
+    # ФУНКЦИЯ ВЫВОДЯЩАЯ ВСЕ ТРАНЗАКЦИИ
+    def get_transactions(self):
+        self.cursor.execute('SELECT * FROM Transactions')
+        return self.cursor.fetchall()
+
     #товары + коли-во
     def get_goods(self):
         self.cursor.execute('''
@@ -51,11 +56,16 @@ class DataBase():
                                 )""", (cnt, name, ex_time))
         self.connection.commit()
 
-    #функция для добавления транзакции
-    def insert_transact(self):
+
+    # функция для добавления транзакции
+    def insert_transact(self, list):
         pass
 
+
+
 db = DataBase()
+
+print(db.get_transactions())
 
 
 
