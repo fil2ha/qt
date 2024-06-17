@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import clients2, products, stores, personal, sell, acceptance, writeoff, transportation
+import clients2, products, stores, personal, spis, replac, buy, sell
 import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
@@ -162,25 +162,22 @@ class Ui_MainWindow(object):
         self.window.show()
 
     def show_change(self):
-        self.ui = transportation.Ui_Dialog()
-        data = self.ui.exec_()
-        line_text = self.lineEdit_2.text()
-        line_text += data
-        self.lineEdit_2.setText(line_text)
+        self.window = QtWidgets.QMainWindow()
+        self.ui = replac.Ui_MainWindow()
+        self.ui.setupUi(self.window)
+        self.window.show()
 
     def show_del(self):
-        self.ui = writeoff.Ui_Dialog()
-        data = self.ui.exec_()
-        line_text = self.lineEdit_2.text()
-        line_text += data
-        self.lineEdit_2.setText(line_text)
+        self.window = QtWidgets.QMainWindow()
+        self.ui = spis.Ui_MainWindow()
+        self.ui.setupUi(self.window)
+        self.window.show()
 
     def show_get(self):
-        self.ui = acceptance.Ui_Dialog()
-        data = self.ui.exec_()
-        line_text = self.lineEdit_2.text()
-        line_text += data
-        self.lineEdit_2.setText(line_text)
+        self.window = QtWidgets.QMainWindow()
+        self.ui = buy.Ui_MainWindow()
+        self.ui.setupUi(self.window)
+        self.window.show()
 
     def show_post(self):
         self.ui = sell.Ui_Dialog()
