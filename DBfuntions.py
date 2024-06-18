@@ -33,14 +33,14 @@ class DataBase():
             JOIN WareHouse ON WareHouse.id = GoodsWarehouse.warehouse_id
         ''')
         return self.cursor.fetchall()
-    #возвращает список картежей
-    #последний элемент кортежа имя склада
+    # возвращает список картежей
+    # последний элемент кортежа имя склада
 
     # функции дял уменьшения и увеличения кол-ва на складе определённого товара
-    def decrease_cnt(self, name, ex_time, cnt):
+    def decrease_cnt(self, name, ex_time, cnt):#исправить
         self.cursor.execute(f"""
                                 UPDATE GoodsWarehouse 
-                                SET count = count - ?
+                                SET count = count - ? 
                                 WHERE id IN (
                                 SELECT id FROM Goods 
                                 WHERE name = ? AND ex_time = ?
@@ -68,7 +68,7 @@ class DataBase():
 
     #функция, которая возвращает имена складов
     def get_wh_names(self):
-        self.cursor.execute( "SELECT name FROM Warehouse")
+        self.cursor.execute("SELECT name FROM Warehouse")
         temp = []
         temp_list = self.cursor.fetchall()
         for _ in temp_list:
@@ -79,11 +79,20 @@ class DataBase():
                     temp.append(__)
         return temp
 
+    #6) заносит значения в sell
+    def insert_sell(self, s_list, sd_list):
+        self.cursor.execute("INSERT INTO Sell (transaction_id, client, from_wh) VALUES(?, ?, ?)", s_list)
+        self.connection.commit()
+        temp_sell_id = self.cursor.lastrowid
+        self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (sd_list[0], sd_list[1]))
+        temp_good_id = self.cursor.fetchone()[0]
+        # Вставка в таблицу SellData
+        self.cursor.execute("INSERT INTO SellData (good_id, sell_id, count, expire_date) VALUES (?, ?, ?, ?)",
+                            (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
+        self.connection.commit()
+
+
 db = DataBase()
-
-
-
-print('')
 
 
 
