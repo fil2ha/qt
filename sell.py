@@ -103,7 +103,7 @@ class Ui_Dialog(QtWidgets.QDialog):
 
     def double_clicked(self, row, column):
         data_row = self.row_data_from_table1(row)
-        data_row.append('') # quantity
+        data_row.append('')  # quantity
 
         data_lst = self.data_from_table2()
         for data in data_lst:
@@ -116,7 +116,7 @@ class Ui_Dialog(QtWidgets.QDialog):
     def cell_changed(self, row, column):
         if column == 4:
             data_changed_row = self.row_data_from_table2(row)
-            if data_changed_row[4] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
+            if data_changed_row[4] != '':  # если поменялось именно количество, то ниже меняем итоговую сумму:
                 self.set_total_sum()
 
     def delete_btn(self):
@@ -168,8 +168,10 @@ class Ui_Dialog(QtWidgets.QDialog):
         super().exec_()
         return self.log_data
 
+
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     ui = Ui_Dialog()
     ui.show()

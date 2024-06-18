@@ -78,8 +78,8 @@ class Ui_MainWindow(object):
 
 
     def function_2(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
-        table_name = 'Clients'
+        con = sqlite3.connect('srm.db', check_same_thread=False)
+        table_name = 'Client'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
             pragma_answer = cur.fetchall()
@@ -159,8 +159,8 @@ class Ui_MainWindow(object):
             self.tableWidget.removeRow(current_row)
 
     def save_changes(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
-        table_name = 'Clients'
+        con = sqlite3.connect('srm.db', check_same_thread=False)
+        table_name = 'Client'
         try:
             with con:
                 cur = con.cursor()
@@ -168,7 +168,7 @@ class Ui_MainWindow(object):
                 cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
             for item in self.items_to_add:
                 cur.executemany(
-                    '''INSERT INTO Clients (id, name, ind_number, ceo, phone, email, address, current_account, bank, bik, bank_address, info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    '''INSERT INTO Client (id, name, ind_number, ceo, phone, email, address, current_account, bank, bik, bank_address, info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                     (item,))
             con.commit()
         except sqlite3.Error as e:

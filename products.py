@@ -7,11 +7,11 @@ import sqlite3
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(985, 683)
+        MainWindow.resize(985, 983)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(20, 20, 951, 631))
+        self.widget.setGeometry(QtCore.QRect(20, 70, 951, 631))
         self.widget.setObjectName("widget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.widget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -81,8 +81,8 @@ class Ui_MainWindow(object):
 
 
     def function_2(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
-        table_name = 'Product'
+        con = sqlite3.connect('srm.db', check_same_thread=False)
+        table_name = 'Goods'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
             pragma_answer = cur.fetchall()
@@ -151,8 +151,8 @@ class Ui_MainWindow(object):
             self.tableWidget.removeRow(current_row)
 
     def save_changes(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
-        table_name = 'Product'
+        con = sqlite3.connect('srm.db', check_same_thread=False)
+        table_name = 'Goods'
         try:
             with con:
                 cur = con.cursor()
