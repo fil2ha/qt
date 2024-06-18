@@ -107,7 +107,7 @@ class Ui_Dialog(QtWidgets.QDialog):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
     def set_combobox_items(self):
-        combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
+        combobox_items = db.get_clients()
         for i in combobox_items:
             self.comboBox.addItem(i)
 
