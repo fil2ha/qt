@@ -60,6 +60,13 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.table_gen()
         self.set_combobox_items()
 
+        self.person = db.get_username()
+
+        self.label_5 = QtWidgets.QLabel(self)
+        self.label_5.setGeometry(QtCore.QRect(550, 750, 221, 41))
+        self.label_5.setObjectName("label_5")
+        self.label_5.setText(f'Ответственный: {self.person[1]}')
+
         self.tableWidget.cellDoubleClicked.connect(self.double_clicked)
 
         self.tableWidget_2.cellChanged.connect(self.cell_changed)
@@ -117,10 +124,10 @@ class Ui_Dialog(QtWidgets.QDialog):
                 self.tableWidget_2.setItem(0, col, QtWidgets.QTableWidgetItem(str(data)))
 
     def cell_changed(self, row, column):
-        if column == 4:
-            data_changed_row = self.row_data_from_table2(row)
-            if data_changed_row[4] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
-                self.set_total_sum()
+        # if column == 4:
+        data_changed_row = self.row_data_from_table2(row)
+        if data_changed_row[4] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
+            self.set_total_sum()
 
     def delete_btn(self):
         row = self.tableWidget_2.currentRow()
@@ -129,13 +136,15 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.set_total_sum()
 
     def save_data(self):
-        if self.quantity_check():
+        if self.quantity_check(): # если введенное количество не больше того, что есть на складе
             data_lst = self.data_from_table2()
+            client = self.comboBox.currentText()
+            person_id = self.person[0]
+            now = datetime.datetime.now()
+            transaction_id = db.insert_transact(['Отпустить', person_id, now, ''])
             for data_row in data_lst:
                 db.decrease_cnt(data_row[1], data_row[3], data_row[4])
-                now = datetime.datetime.now()
-                transaction_id = db.insert_transact(['Отпустить', '1', now, ''])
-                print(transaction_id)
+                db.insert_sell([transaction_id, client, person_id], [data_row[1], data_row[3], data_row[4], data_row[3]])
 
             self.log_data = 'Проведена операция "Отпустить". '
             self.close()
