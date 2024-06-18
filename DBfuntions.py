@@ -1,5 +1,7 @@
 import sqlite3 as sl
 
+person_id = 0
+person_name = ''
 class DataBase():
     def __init__(self):
         self.connection = sl.connect('srm.db', check_same_thread=False)
@@ -8,6 +10,8 @@ class DataBase():
     def login_admin(self, username, password):
         self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
         user = self.cursor.fetchone()
+        person_name = user[2]
+        person_id = user[3]
         if user:
             return user[2]
         else:
@@ -53,18 +57,11 @@ class DataBase():
                                 WHERE name = ? AND ex_time = ?
                             )""", (cnt, name, ex_time))
         self.connection.commit()
-    def increase_cnt(self, name, ex_time, cnt):
+    def increase_cnt(self, list_good, list_warehouse):
         self.cursor.execute(f"""
-                                    UPDATE GoodsWarehouse 
-                                    SET count = count + ?
-                                    WHERE id IN 
-                                    (
-                                        SELECT id FROM Goods 
-                                        WHERE name = ? AND ex_time = ?
-                                    )
-                                """, (cnt, name, ex_time))
+                                SELECT * FROM Goods WHERE name = ? AND ex_time = ? VALUES(?, ?)
+                            """, )
         self.connection.commit()
-
 
     # функция для добавления транзакции и возвращегия id этой транзакции
     def insert_transact(self, list):

@@ -4,8 +4,6 @@ import sqlite3
 import main
 from DBfuntions import db
 
-person_id = 0
-person_name = ''
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -56,13 +54,11 @@ class Ui_MainWindow(object):
             QMessageBox.warning(None, "Ошибка", "Логин или пароль введены неверно!")
             print("Ошибка авторизации")
 
-
     def open_main(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = main.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-
 
 if __name__ == "__main__":
     import sys
