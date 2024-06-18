@@ -99,11 +99,17 @@ class DataBase():
                             (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
         self.connection.commit()
 
-
+    def get_clients(self):
+        self.cursor.execute("SELECT FIO FROM Client")
+        temp =[]
+        for _ in self.cursor.fetchall():
+            for __ in _:
+                temp.append(__)
+        return temp
 
 db = DataBase()
 
-
+db.get_clients()
 
 
 
