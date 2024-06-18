@@ -91,6 +91,13 @@ class DataBase():
                             (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
         self.connection.commit()
 
+    def login_admin(self, username, password):
+        self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
+        user = self.cursor.fetchone()
+        if user:
+            return user[2]
+        else:
+            return ""
 
 db = DataBase()
 
