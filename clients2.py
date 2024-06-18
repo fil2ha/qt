@@ -80,7 +80,7 @@ class Ui_MainWindow(object):
     #cosyak
     def function_2(self):
         con = sqlite3.connect('srm.db', check_same_thread=False)
-        table_name = 'Clients'
+        table_name = 'Client'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
             pragma_answer = cur.fetchall()
