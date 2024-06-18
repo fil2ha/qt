@@ -6,6 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
 import os
 from documents import generate_document  # Импортируем функцию из другого файла
+from DBfuntions import db
 
 
 class Ui_MainWindow(object):
@@ -29,6 +30,7 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
+        self.tableWidget.itemSelectionChanged.connect(self.on_item_selection_changed)
 
         # self.tableView = QtWidgets.QTableView(self.centralwidget)
         # self.tableView.setGeometry(QtCore.QRect(30, 150, 1061, 491))
@@ -37,6 +39,7 @@ class Ui_MainWindow(object):
         self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit_2.setGeometry(QtCore.QRect(30, 650, 841, 61))
         self.lineEdit_2.setObjectName("lineEdit_2")
+
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(80, 30, 931, 81))
         self.widget.setObjectName("widget")
@@ -120,6 +123,8 @@ class Ui_MainWindow(object):
         self.pushButton_documents.clicked.connect(self.open_documents)  # Подключаем новую функцию
         self.database1()
 
+        self.selected_row_data = []  # Инициализация атрибута для хранения данных выбранной строки
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Главная"))
@@ -135,37 +140,6 @@ class Ui_MainWindow(object):
         self.pushButton_personal.setText(_translate("MainWindow", "ПЕРСОНАЛ"))
         self.pushButton__product.setText(_translate("MainWindow", "ТОВАРЫ"))
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
-
-    def open_documents(self):
-        # Показать диалог выбора операции
-        # operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
-        operations = "Продажа"
-
-        generate_document(operations)
-        # Устанавливаем текст в lineEdit_2
-        self.lineEdit_2.setText(f"Сформирован документ {operations}")
-
-    # def open_documents(self):
-    #
-    #     options = QtWidgets.QFileDialog.Options()
-    #     fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Выберите документ", "", "All Files (*);;Word Files "
-    #                                                                                        "(*.docx);;Excel Files ("
-    #                                                                                        "*.xlsx)", options=options)
-    #     if fileName:
-    #         try:
-    #             os.startfile(fileName)
-    #         except Exception as e:
-    #             print(f"Не удалось открыть файл {fileName}. Ошибка: {e}")
-
-    # def open_documents(self):
-    #     # Показать диалог выбора операции
-    #     operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
-    #     operation, ok = QtWidgets.QInputDialog.getItem(None, "Выберите операцию", "Операция:", operations, 0, False)
-    #     if ok and operation:
-    #         try:
-    #             generate_document(operation)
-    #         except Exception as e:
-    #             QtWidgets.QMessageBox.critical(None, "Ошибка", f"Не удалось создать документ. Ошибка: {e}")
 
     def show_clients(self):
         self.window = QtWidgets.QMainWindow()
@@ -240,6 +214,62 @@ class Ui_MainWindow(object):
             for i in range(len(table_data)):
                 for j in range(len(table_data[i])):
                     self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
+
+    def open_documents(self):
+        # Показать диалог выбора операции
+        # Здесь можно реализовать логику выбора операции пользователем
+        # operations = "Продажа"  # Пример операции "человеческой", может быть изменено на выбор пользователя
+
+        id_transaction = self.selected_row_data[0]
+        print(id_transaction)
+        list_data_transaction = db.get_transaction_by_id(id_transaction)
+        operations = list_data_transaction[0][1]
+        print(list_data_transaction)
+        print(operations)
+
+        # Генерируем документ с использованием данных выбранной строки
+        generate_document(operations, list_data_transaction[0])
+
+        # Устанавливаем текст в lineEdit_2
+        self.lineEdit_2.setText(
+            f"Сформирован документ по транзакции - {operations}. Некоторые чекануться, а кто-то даже охереет!")
+
+    """метод on_item_selection_changed, который вызывается при изменении выделения в tableWidget. В этом методе 
+    получаются данные из выделенной строки и выводятся в консоль"""
+
+    def on_item_selection_changed(self):
+        selected_items = self.tableWidget.selectedItems()
+        if selected_items:
+            selected_row = selected_items[0].row()
+            self.selected_row_data = []
+            for column in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(selected_row, column)
+                if item:
+                    self.selected_row_data.append(item.text())
+            print("Selected row data:", self.selected_row_data)
+
+
+    # def open_documents(self):
+    #
+    #     options = QtWidgets.QFileDialog.Options()
+    #     fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Выберите документ", "", "All Files (*);;Word Files "
+    #                                                                                        "(*.docx);;Excel Files ("
+    #                                                                                        "*.xlsx)", options=options)
+    #     if fileName:
+    #         try:
+    #             os.startfile(fileName)
+    #         except Exception as e:
+    #             print(f"Не удалось открыть файл {fileName}. Ошибка: {e}")
+
+    # def open_documents(self):
+    #     # Показать диалог выбора операции
+    #     operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
+    #     operation, ok = QtWidgets.QInputDialog.getItem(None, "Выберите операцию", "Операция:", operations, 0, False)
+    #     if ok and operation:
+    #         try:
+    #             generate_document(operation)
+    #         except Exception as e:
+    #             QtWidgets.QMessageBox.critical(None, "Ошибка", f"Не удалось создать документ. Ошибка: {e}")
 
 
 if __name__ == "__main__":
