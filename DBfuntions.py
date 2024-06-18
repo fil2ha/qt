@@ -42,7 +42,7 @@ class DataBase():
     #товары + склад + кол-во
     def get_goods_with_wh(self):
         self.cursor.execute('''
-            SELECT Goods.articul, Goods.name, Goods.price, Goods.ex_time, GoodsWarehouse.count, Warehouse.name FROM Goods
+            SELECT Goods.articul, Goods.name, Goods.price, Goods.ex_time, Warehouse.name, GoodsWarehouse.count FROM Goods
             JOIN GoodsWarehouse ON Goods.id = GoodsWarehouse.good_id
             JOIN WareHouse ON WareHouse.id = GoodsWarehouse.warehouse_id
         ''')
