@@ -9,10 +9,12 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from authentication import person_name, person_id
+# from authentication import person_name, person_id
 from DBfuntions import db
 from PyQt5.QtWidgets import QMessageBox
 import datetime
+from PERSON_data import person_name, person_id
+
 
 
 class Ui_Dialog(QtWidgets.QDialog):
@@ -100,6 +102,8 @@ class Ui_Dialog(QtWidgets.QDialog):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
+        print(person_name, person_id)
+
     def set_combobox_items(self):
         combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
         for i in combobox_items:
@@ -132,11 +136,13 @@ class Ui_Dialog(QtWidgets.QDialog):
     def save_data(self):
         if self.quantity_check():
             data_lst = self.data_from_table2()
+            client = self.comboBox.currentText()
             for data_row in data_lst:
                 db.decrease_cnt(data_row[1], data_row[3], data_row[4])
                 now = datetime.datetime.now()
                 transaction_id = db.insert_transact(['Отпустить', '1', now, ''])
-                print(transaction_id)
+                db.insert_sell([transaction_id, client, '1'], ['apple', '123', '1', 'x'])
+                # print(transaction_id)
 
             self.log_data = 'Проведена операция "Отпустить". '
             self.close()
