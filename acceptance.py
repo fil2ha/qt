@@ -41,12 +41,12 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.label_3 = QtWidgets.QLabel(self)
         self.label_3.setGeometry(QtCore.QRect(550, 680, 201, 41))
         self.label_3.setObjectName("label_3")
-        self.label_4 = QtWidgets.QLabel(self)
-        self.label_4.setGeometry(QtCore.QRect(20, 760, 151, 41))
-        self.label_4.setObjectName("label_4")
-        self.comboBox = QtWidgets.QComboBox(self)
-        self.comboBox.setGeometry(QtCore.QRect(180, 761, 261, 31))
-        self.comboBox.setObjectName("comboBox")
+        # self.label_4 = QtWidgets.QLabel(self)
+        # self.label_4.setGeometry(QtCore.QRect(20, 760, 151, 41))
+        # self.label_4.setObjectName("label_4")
+        # self.comboBox = QtWidgets.QComboBox(self)
+        # self.comboBox.setGeometry(QtCore.QRect(180, 761, 261, 31))
+        # self.comboBox.setObjectName("comboBox")
         self.pushButton_2 = QtWidgets.QPushButton(self)
         self.pushButton_2.setGeometry(QtCore.QRect(270, 830, 221, 51))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -55,7 +55,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setObjectName("pushButton_3")
 
         self.table_gen()
-        self.set_combobox_items()
+        # self.set_combobox_items()
 
         self.tableWidget.cellDoubleClicked.connect(self.double_clicked)
 
@@ -71,12 +71,12 @@ class Ui_Dialog(QtWidgets.QDialog):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.setWindowTitle(_translate("Dialog", "Отпустить"))
+        self.setWindowTitle(_translate("Dialog", "Принять"))
         self.label.setText(_translate("Dialog", "Выберите продукты из списка:"))
         self.label_2.setText(_translate("Dialog", "Выбранные продукты:"))
         self.pushButton.setText(_translate("Dialog", "Удалить"))
         self.label_3.setText(_translate("Dialog", "Итоговая сумма"))
-        self.label_4.setText(_translate("Dialog", "Клиент"))
+        # self.label_4.setText(_translate("Dialog", "Ответственный"))
         self.pushButton_2.setText(_translate("Dialog", "Отменить"))
         self.pushButton_3.setText(_translate("Dialog", "Сохранить"))
 
@@ -96,10 +96,10 @@ class Ui_Dialog(QtWidgets.QDialog):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
-    def set_combobox_items(self):
-        combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
-        for i in combobox_items:
-            self.comboBox.addItem(i)
+    # def set_combobox_items(self):
+    #     combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
+    #     for i in combobox_items:
+    #         self.comboBox.addItem(i)
 
     def double_clicked(self, row, column):
         data_row = self.row_data_from_table1(row)
@@ -126,7 +126,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.set_total_sum()
 
     def save_data(self):
-        self.log_data = 'Проведена операция "Отпустить". '
+        self.log_data = 'Проведена операция "Принять". '
         self.close()
 
     def set_total_sum(self):

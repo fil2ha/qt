@@ -105,8 +105,8 @@ def generate_document(operation):
         # Открываем созданный файл автоматически
         if os.name == 'nt':  # Если ОС Windows
             os.startfile(output_file)
-        # elif os.name == 'posix':  # Если ОС Linux или MacOS
-        #     os.system(f'open "{output_file}"')
+        elif os.name == 'posix':  # Если ОС Linux или MacOS
+            os.system(f'open "{output_file}"')
         else:
             raise OSError(f"Unsupported operating system: {os.name}")
     else:
@@ -115,4 +115,4 @@ def generate_document(operation):
 
 
 # Пример использования:
-generate_document("Продажа")
+# generate_document("Продажа")

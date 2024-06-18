@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QMessageBox
 import sqlite3
 import main
 
-
+person_id = 0
+person_name = ''
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -51,7 +52,7 @@ class Ui_MainWindow(object):
         user = cursor.fetchone()
 
         if user:
-            print("OK")
+            #добавть id, добавить имя
             self.open_main()
 
             MainWindow.close()
