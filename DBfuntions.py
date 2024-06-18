@@ -5,6 +5,13 @@ class DataBase():
         self.connection = sl.connect('srm.db', check_same_thread=False)
         self.cursor = self.connection.cursor()
 
+    def login_admin(self, username, password):
+        self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
+        user = self.cursor.fetchone()
+        if user:
+            return user[2]
+        else:
+            return ""
     #транзакция по id
     def get_transaction_by_id(self, id):
         self.cursor.execute("SELECT * FROM Transactions WHERE id = ?", (id,))
@@ -91,13 +98,7 @@ class DataBase():
                             (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
         self.connection.commit()
 
-    def login_admin(self, username, password):
-        self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
-        user = self.cursor.fetchone()
-        if user:
-            return user[2]
-        else:
-            return ""
+
 
 db = DataBase()
 

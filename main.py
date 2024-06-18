@@ -189,9 +189,8 @@ class Ui_MainWindow(object):
         line_text += data
         self.lineEdit_2.setText(line_text)
 
-
     def database1(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
+        con = sqlite3.connect('srm.db', check_same_thread=False)
         table_name = 'Transactions'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
