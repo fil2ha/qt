@@ -11,7 +11,7 @@ class DataBase():
         self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
         user = self.cursor.fetchone()
         person_name = user[2]
-        person_id = user[3]
+        person_id = user[0]
         if user:
             return user[2]
         else:
