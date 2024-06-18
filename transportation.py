@@ -9,6 +9,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from DBfuntions import db
+from PyQt5.QtWidgets import QMessageBox
+import datetime
 
 
 class Ui_Dialog(QtWidgets.QDialog):
@@ -57,6 +60,13 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.table_gen()
         # self.set_combobox_items()
 
+        self.person = db.get_username()
+
+        self.label_5 = QtWidgets.QLabel(self)
+        self.label_5.setGeometry(QtCore.QRect(550, 750, 221, 41))
+        self.label_5.setObjectName("label_5")
+        self.label_5.setText(f'Ответственный: {self.person[1]}')
+
         self.tableWidget.cellDoubleClicked.connect(self.double_clicked)
 
         # self.tableWidget_2.cellChanged.connect(self.cell_changed)
@@ -81,18 +91,18 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setText(_translate("Dialog", "Сохранить"))
 
     def table_gen(self):
-        goods_data = [('1234', 'milk', 45, '20240630', 'Warehouse1'), ('5678', 'egg', 12, '20240712', 'Warehouse1')]
-        headers_one = ['articul', 'name', 'price', 'ex_time', 'warehouse']
+        goods_lst = db.get_goods_with_wh()
+        headers_one = ['articul', 'name', 'price', 'ex_time', 'warehouse', 'quant in warehouse']
         headers_two = ['articul', 'name', 'price', 'ex_time', 'from warehouse 1','to warehouse 2', 'quantity']
 
         self.tableWidget.setColumnCount(len(headers_one))
-        self.tableWidget.setRowCount(len(goods_data))
+        self.tableWidget.setRowCount(len(goods_lst))
         self.tableWidget.setHorizontalHeaderLabels(headers_one)
 
         self.tableWidget_2.setColumnCount(len(headers_two))
         self.tableWidget_2.setHorizontalHeaderLabels(headers_two)
 
-        for row, i in enumerate(goods_data):
+        for row, i in enumerate(goods_lst):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
@@ -102,10 +112,10 @@ class Ui_Dialog(QtWidgets.QDialog):
     #         self.comboBox.addItem(i)
 
     def double_clicked(self, row, column):
-        warehouse_list = ['w1', 'w2', 'w3']
+        warehouse_list = db.get_wh_names()
         data_row = self.row_data_from_table1(row)
-        data_row.append('') # warehouse2
-        data_row.append('') # quantity
+        data_row[5] = ''
+        data_row.append('')
 
         data_lst = self.data_from_table2()
         for data in data_lst:
@@ -135,10 +145,18 @@ class Ui_Dialog(QtWidgets.QDialog):
         # self.set_total_sum()
 
     def save_data(self):
-        self.log_data = 'Проведена операция "Переместить". '
-        self.close()
-        print(self.data_from_table2())
-    #
+        if self.quantity_check():  # если введенное количество не больше того, что есть на складе
+            data_lst = self.data_from_table2()
+            person_id = self.person[0]
+            now = datetime.datetime.now()
+            transaction_id = db.insert_transact(['Переместить', person_id, now, ''])
+
+            self.log_data = 'Проведена операция "Переместить". '
+            self.close()
+        else:
+            QMessageBox.warning(None, "Ошибка", "Вы указали количество больше, чем есть на складе!")
+
+
     # def set_total_sum(self):
     #     data_lst = self.data_from_table2()
     #     sum = 0
@@ -178,6 +196,16 @@ class Ui_Dialog(QtWidgets.QDialog):
             lst.append(data)
         return lst
 
+    def quantity_check(self):
+        data_lst_tb2 = self.data_from_table2()
+        goods_lst = db.get_goods_with_wh()
+
+        for data_row in data_lst_tb2:
+            for good in goods_lst:
+                if data_row[1] == good[1]:
+                    if int(good[5]) < int(data_row[6]):
+                        return False
+        return True
     def exec_(self):
         super().exec_()
         return self.log_data

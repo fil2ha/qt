@@ -1,19 +1,24 @@
 import sqlite3 as sl
-from PERSON_data import person_name, person_id
+
 class DataBase():
     def __init__(self):
         self.connection = sl.connect('srm.db', check_same_thread=False)
         self.cursor = self.connection.cursor()
+        self.person_id = 0
+        self.person_name = ''
 
     def login_admin(self, username, password):
         self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
         user = self.cursor.fetchone()
-        person_name = user[2]
-        person_id = user[0]
         if user:
+            self.person_id = user[0]
+            self.person_name = user[2]
             return user[2]
         else:
             return ""
+
+    def get_username(self):
+        return [self.person_id, self.person_name]
     #транзакция по id
     def get_transaction_by_id(self, id):
         self.cursor.execute("SELECT * FROM Transactions WHERE id = ?", (id,))
@@ -37,7 +42,7 @@ class DataBase():
     #товары + склад + кол-во
     def get_goods_with_wh(self):
         self.cursor.execute('''
-            SELECT Goods.articul, Goods.name, Goods.price, Goods.ex_time, GoodsWarehouse.count, Warehouse.name FROM Goods
+            SELECT Goods.articul, Goods.name, Goods.price, Goods.ex_time, Warehouse.name, GoodsWarehouse.count FROM Goods
             JOIN GoodsWarehouse ON Goods.id = GoodsWarehouse.good_id
             JOIN WareHouse ON WareHouse.id = GoodsWarehouse.warehouse_id
         ''')
@@ -84,23 +89,28 @@ class DataBase():
         return temp
 
     #6) заносит значения в sell
-    def insert_sell(self, s_list, sd_list):
+    def insert_sell(self, s_list):
         self.cursor.execute("INSERT INTO Sell (transaction_id, client, from_wh) VALUES(?, ?, ?)", s_list)
         self.connection.commit()
-        temp_sell_id = self.cursor.lastrowid
+        return self.cursor.lastrowid
+
+    def insert_SellData(self, sd_list):
         self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (sd_list[0], sd_list[1]))
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute("INSERT INTO SellData (good_id, sell_id, count, expire_date) VALUES (?, ?, ?, ?)",
-                            (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
+                            (temp_good_id, sd_list[2], sd_list[3], sd_list[4]))
         self.connection.commit()
-
-
+    def get_clients(self):
+        self.cursor.execute("SELECT FIO FROM Client")
+        temp = []
+        for _ in self.cursor.fetchall():
+            for __ in _:
+                temp.append(__)
+        return temp
 
 db = DataBase()
 
-print(person_id)
-print(person_name)
-
+db.get_clients()
 
 
 
