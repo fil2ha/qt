@@ -1,7 +1,6 @@
 from docxtpl import DocxTemplate
 import os
 
-
 #
 # # какая-то проверочная переменная из таблицы главного окна
 # operation = ...
@@ -67,28 +66,55 @@ import os
 #     doc_acceptance.save("generated_acceptance_docx.docx")
 
 
-def generate_document(operation):
+# def generate_document(operation, row_data):
+def generate_document(operation, row_data):
+
+    print(row_data)
     # определяем словарь переменных контекста, которые определены в шаблоне документа DOCX
+    # это было по "человечески"
+    # context = {
+    #     'name_operation': 'Название транзакции',  # Переменная для имени операции
+    #     'date_operation': 'Дата транзакции',  # Переменная для даты операции
+    #     'summa_operation': 'Сумма транзакции'  # Переменная для суммы операции
+    # }
+
+    # а это можно чекануться
     context = {
-        'name_operation': 'Название транзакции',  # Переменная для имени операции
-        'date_operation': 'Дата транзакции',  # Переменная для даты операции
-        'summa_operation': 'Сумма транзакции'  # Переменная для суммы операции
+        'name_operation': row_data[1],  # Переменная уже не понятно для чего
+        'date_operation': row_data[2],  # Переменная уже не понятно для чего
+        'summa_operation': row_data[3]  # Переменная уже не понятно для чего
     }
 
     # Словарь, который сопоставляет операции с соответствующими шаблонными файлами DOCX
+    # template_files = {
+    #     "Продажа": "sale_tpl.docx",  # Шаблон для операции
+    #     "Перемещение": "moving_tpl.docx",
+    #     "Списание": "offs_tpl.docx",
+    #     "Приемка": "acceptance_tpl.docx"
+    # }
+
+    # Словарь, который сопоставляет операции с соответствующими шаблонными файлами DOCX
     template_files = {
-        "Продажа": "sale_tpl.docx",  # Шаблон для операции
-        "Перемещение": "moving_tpl.docx",
-        "Списание": "offs_tpl.docx",
-        "Приемка": "acceptance_tpl.docx"
+        "x": "sale_tpl.docx",  # Шаблон для операции - это ё...ь какая-то
+        "y": "moving_tpl.docx",
+        "z": "offs_tpl.docx",
+        "p": "acceptance_tpl.docx"
     }
 
     # Словарь, который сопоставляет операции с соответствующими выходными файлами DOCX
+    # output_files = {
+    #     "Продажа": "generated_sale_docx.docx",  # Выходной файл для операции
+    #     "Перемещение": "generated_moving_docx.docx",
+    #     "Списание": "generated_offs_docx.docx",
+    #     "Приемка": "generated_acceptance_docx.docx"
+    # }
+
+    # Словарь, который сопоставляет операции с соответствующими выходными файлами DOCX
     output_files = {
-        "Продажа": "generated_sale_docx.docx",  # Выходной файл для операции
-        "Перемещение": "generated_moving_docx.docx",
-        "Списание": "generated_offs_docx.docx",
-        "Приемка": "generated_acceptance_docx.docx"
+        "x": "generated_sale_docx.docx",  # Выходной файл для операции
+        "y": "generated_moving_docx.docx",
+        "z": "generated_offs_docx.docx",
+        "p": "generated_acceptance_docx.docx"
     }
 
     # Проверяем, существует ли переданная операция в словаре шаблонных файлов
