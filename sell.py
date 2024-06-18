@@ -9,7 +9,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from authentication import person_name, person_id
 from DBfuntions import db
 from PyQt5.QtWidgets import QMessageBox
 import datetime
