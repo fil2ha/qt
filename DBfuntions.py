@@ -1,7 +1,5 @@
 import sqlite3 as sl
-
-person_id = 0
-person_name = ''
+from PERSON_data import person_name, person_id
 class DataBase():
     def __init__(self):
         self.connection = sl.connect('srm.db', check_same_thread=False)
@@ -12,6 +10,7 @@ class DataBase():
         user = self.cursor.fetchone()
         person_name = user[2]
         person_id = user[0]
+
         if user:
             return user[2]
         else:
@@ -57,6 +56,8 @@ class DataBase():
                                 WHERE name = ? AND ex_time = ?
                             )""", (cnt, name, ex_time))
         self.connection.commit()
+
+    # доделать
     def increase_cnt(self, list_good, list_warehouse):
         self.cursor.execute(f"""
                                 SELECT * FROM Goods WHERE name = ? AND ex_time = ? VALUES(?, ?)
@@ -90,7 +91,6 @@ class DataBase():
         temp_sell_id = self.cursor.lastrowid
         self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (sd_list[0], sd_list[1]))
         temp_good_id = self.cursor.fetchone()[0]
-        # Вставка в таблицу SellData
         self.cursor.execute("INSERT INTO SellData (good_id, sell_id, count, expire_date) VALUES (?, ?, ?, ?)",
                             (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
         self.connection.commit()
@@ -99,7 +99,8 @@ class DataBase():
 
 db = DataBase()
 
-
+print(person_id)
+print(person_name)
 
 
 
