@@ -47,9 +47,9 @@ class Ui_Dialog(QtWidgets.QDialog):
         # self.label_4 = QtWidgets.QLabel(self)
         # self.label_4.setGeometry(QtCore.QRect(20, 760, 151, 41))
         # self.label_4.setObjectName("label_4")
-        # self.comboBox = QtWidgets.QComboBox(self)
-        # self.comboBox.setGeometry(QtCore.QRect(180, 761, 261, 31))
-        # self.comboBox.setObjectName("comboBox")
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.setGeometry(QtCore.QRect(180, 761, 261, 31))
+        self.comboBox.setObjectName("comboBox")
         self.pushButton_2 = QtWidgets.QPushButton(self)
         self.pushButton_2.setGeometry(QtCore.QRect(270, 830, 221, 51))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -58,7 +58,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setObjectName("pushButton_3")
 
         self.table_gen()
-        # self.set_combobox_items()
+        self.set_combobox_items()
 
         self.person = db.get_username()
 
@@ -106,10 +106,10 @@ class Ui_Dialog(QtWidgets.QDialog):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
-    # def set_combobox_items(self):
-    #     combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
-    #     for i in combobox_items:
-    #         self.comboBox.addItem(i)
+    def set_combobox_items(self):
+        combobox_items = db.get_clients()
+        for i in combobox_items:
+            self.comboBox.addItem(i)
 
     def double_clicked(self, row, column):
         data_row = self.row_data_from_table1(row)
