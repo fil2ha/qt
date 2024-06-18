@@ -141,8 +141,7 @@ class Ui_Dialog(QtWidgets.QDialog):
                 db.decrease_cnt(data_row[1], data_row[3], data_row[4])
                 now = datetime.datetime.now()
                 transaction_id = db.insert_transact(['Отпустить', '1', now, ''])
-                db.insert_sell([transaction_id, client, '1'], ['apple', '123', '1', 'x'])
-                # print(transaction_id)
+                db.insert_sell([transaction_id, client, '1'], [data_row[1], data_row[3], data_row[2], data_row[3]])
 
             self.log_data = 'Проведена операция "Отпустить". '
             self.close()
