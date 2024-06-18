@@ -1,19 +1,24 @@
 import sqlite3 as sl
-from PERSON_data import person_name, person_id
+
 class DataBase():
     def __init__(self):
         self.connection = sl.connect('srm.db', check_same_thread=False)
         self.cursor = self.connection.cursor()
+        self.person_id = 0
+        self.person_name = ''
 
     def login_admin(self, username, password):
         self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
         user = self.cursor.fetchone()
-        person_name = user[2]
-        person_id = user[0]
         if user:
+            self.person_id = user[0]
+            self.person_name = user[2]
             return user[2]
         else:
             return ""
+
+    def get_username(self):
+        return [self.person_id, self.person_name]
     #транзакция по id
     def get_transaction_by_id(self, id):
         self.cursor.execute("SELECT * FROM Transactions WHERE id = ?", (id,))
@@ -98,8 +103,6 @@ class DataBase():
 
 db = DataBase()
 
-print(person_id)
-print(person_name)
 
 
 

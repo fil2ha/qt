@@ -1,9 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-import sqlite3
 import main
 from DBfuntions import db
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -46,8 +44,8 @@ class Ui_MainWindow(object):
     def authenticate(self):
         username = self.login.text()
         password = self.password.text()
-
-        if db.login_admin(username, password):
+        temp = db.login_admin(username, password)
+        if temp:
             self.open_main()
             MainWindow.close()
         else:

@@ -9,7 +9,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from authentication import person_name, person_id
 from DBfuntions import db
 from PyQt5.QtWidgets import QMessageBox
 import datetime
@@ -85,6 +84,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setText(_translate("Dialog", "Сохранить"))
 
     def table_gen(self):
+        print(db.get_username())
         goods_lst = db.get_goods()
         headers_one = ['articul', 'name', 'price', 'ex_time', 'quant in warehouse']
         headers_two = ['articul', 'name', 'price', 'ex_time', 'quantity']
