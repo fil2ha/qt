@@ -10,7 +10,6 @@ class DataBase():
         user = self.cursor.fetchone()
         person_name = user[2]
         person_id = user[0]
-
         if user:
             return user[2]
         else:
