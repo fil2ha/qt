@@ -89,19 +89,20 @@ class DataBase():
         return temp
 
     #6) заносит значения в sell
-    def insert_sell(self, s_list, sd_list):
+    def insert_sell(self, s_list):
         self.cursor.execute("INSERT INTO Sell (transaction_id, client, from_wh) VALUES(?, ?, ?)", s_list)
         self.connection.commit()
-        temp_sell_id = self.cursor.lastrowid
+        return self.cursor.lastrowid
+
+    def insert_SellData(self, sd_list):
         self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (sd_list[0], sd_list[1]))
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute("INSERT INTO SellData (good_id, sell_id, count, expire_date) VALUES (?, ?, ?, ?)",
-                            (temp_good_id, temp_sell_id, sd_list[2], sd_list[3]))
+                            (temp_good_id, sd_list[2], sd_list[3], sd_list[4]))
         self.connection.commit()
-
     def get_clients(self):
         self.cursor.execute("SELECT FIO FROM Client")
-        temp =[]
+        temp = []
         for _ in self.cursor.fetchall():
             for __ in _:
                 temp.append(__)
