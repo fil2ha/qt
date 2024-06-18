@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from DBfuntions import db
 
 
 class Ui_Dialog(QtWidgets.QDialog):
@@ -81,18 +82,24 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setText(_translate("Dialog", "Сохранить"))
 
     def table_gen(self):
-        goods_data = [('1234', 'milk', 45, '20240630', 'Warehouse1'), ('5678', 'egg', 12, '20240712', 'Warehouse1')]
-        headers_one = ['articul', 'name', 'price', 'ex_time', 'warehouse']
+        goods_lst = db.get_goods_with_wh()
+        # temp = goods_lst[4]
+        # goods_lst.remove(temp)
+        # goods_lst.append(temp)
+        # print(goods_lst)
+        # goods_data = [('1234', 'milk', 45, '20240630', 'Warehouse1'), ('5678', 'egg', 12, '20240712', 'Warehouse1')]
+        #
+        headers_one = ['articul', 'name', 'price', 'ex_time', 'warehouse', 'quant in warehouse']
         headers_two = ['articul', 'name', 'price', 'ex_time', 'from warehouse 1','to warehouse 2', 'quantity']
 
         self.tableWidget.setColumnCount(len(headers_one))
-        self.tableWidget.setRowCount(len(goods_data))
+        self.tableWidget.setRowCount(len(goods_lst))
         self.tableWidget.setHorizontalHeaderLabels(headers_one)
 
         self.tableWidget_2.setColumnCount(len(headers_two))
         self.tableWidget_2.setHorizontalHeaderLabels(headers_two)
 
-        for row, i in enumerate(goods_data):
+        for row, i in enumerate(goods_lst):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
 
@@ -102,10 +109,10 @@ class Ui_Dialog(QtWidgets.QDialog):
     #         self.comboBox.addItem(i)
 
     def double_clicked(self, row, column):
-        warehouse_list = ['w1', 'w2', 'w3']
+        warehouse_list = db.get_wh_names()
         data_row = self.row_data_from_table1(row)
-        data_row.append('') # warehouse2
-        data_row.append('') # quantity
+        data_row[5] = ''
+        data_row.append('')
 
         data_lst = self.data_from_table2()
         for data in data_lst:
