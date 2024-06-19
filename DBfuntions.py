@@ -260,4 +260,3 @@ class DataBase():
 
 db = DataBase()
 
-db.get_trans_info('acceptance')
