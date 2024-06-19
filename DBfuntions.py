@@ -260,7 +260,7 @@ class DataBase():
         self.cursor.execute(f'Pragma table_info ("{query}")')
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
-        print(temp)
+        return temp
 
 db = DataBase()
 
