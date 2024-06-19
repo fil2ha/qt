@@ -56,7 +56,7 @@ class DataBase():
                                 SET count = count - ? 
                                 WHERE id IN (
                                 SELECT id FROM Goods 
-                                WHERE name = ? AND ex_time = ? 
+                                WHERE name = ? AND ex_time = ?
                             )""", (cnt, name, ex_time))
         self.connection.commit()
 
@@ -260,6 +260,7 @@ class DataBase():
         self.cursor.execute(f'Pragma table_info ("{query}")')
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
-        return temp
+        return(temp)
 
 db = DataBase()
+

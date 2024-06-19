@@ -1,10 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-import clients2, products, stores, personal, spis, replac, buy, sell
+#import clients2, products, stores, personal#, spis, replac, buy, sell
 import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
+from DBfuntions import db, DataBase
 
 
 class TransactionDialog(QtWidgets.QDialog):
@@ -132,6 +133,8 @@ class Ui_MainWindow(object):
         self.pushButton_get.clicked.connect(self.show_get)
         self.pushButton_post.clicked.connect(self.show_post)
         self.pushButton_exit.clicked.connect(MainWindow.close)
+
+        self.db =DataBase()
         self.database1()
         self.tableWidget.cellClicked.connect(self.show_transaction_details)
 
@@ -152,100 +155,101 @@ class Ui_MainWindow(object):
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
 
     def show_clients(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = clients2.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
-
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = clients2.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
     def show_personal(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = personal.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = personal.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
 
     def show_product(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = products.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = products.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
     def show_stores(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = stores.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = stores.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
     def show_change(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = replac.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = replac.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
     def show_del(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = spis.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = spis.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
     def show_get(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = buy.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
+        # self.window = QtWidgets.QMainWindow()
+        # self.ui = buy.Ui_MainWindow()
+        # self.ui.setupUi(self.window)
+        # self.window.show()
+        pass
 
     def show_post(self):
-        self.ui = sell.Ui_Dialog()
-        data = self.ui.exec_()
-        line_text = self.lineEdit_2.text()
-        line_text += data
-        self.lineEdit_2.setText(line_text)
-
+        # self.ui = sell.Ui_Dialog()
+        # data = self.ui.exec_()
+        # line_text = self.lineEdit_2.text()
+        # line_text += data
+        # self.lineEdit_2.setText(line_text)
+        pass
 
     def database1(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
-        table_name = 'Transactions'
-        with con:
-            cur = con.execute(f"Pragma table_info ('{table_name}')")
-            pragma_answer = cur.fetchall()
+        self.conn = sqlite3.connect('srm.db')
+        self.c = self.conn.cursor()
 
-            list_of_col = [i[1] for i in pragma_answer]
+        self.c.execute('SELECT * FROM Transactions')
+        data = self.c.fetchall()
 
-            cur = con.execute(f"Select * From {table_name}")
-            table_data = cur.fetchall()
-            list_of_left_rows = [str(i[0]) for i in table_data]
+        if data:
+            self.tableWidget.setRowCount(len(data))
+            self.tableWidget.setColumnCount(len(data[0]))
 
-            self.tableWidget.setColumnCount(len(list_of_col))
-            self.tableWidget.setHorizontalHeaderLabels(list_of_col)
-            self.tableWidget.setRowCount(len(list_of_left_rows))
-            self.tableWidget.setVerticalHeaderLabels(list_of_left_rows)
+            # Populate the table with data
+            for row_idx, row_data in enumerate(data):
+                for col_idx, col_data in enumerate(row_data):
+                    self.tableWidget.setItem(row_idx, col_idx, QtWidgets.QTableWidgetItem(str(col_data)))
 
-            for i in range(len(table_data)):
-                for j in range(len(table_data[i])):
-                    self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
+            headers = [description[0] for description in self.c.description]
+            self.tableWidget.setHorizontalHeaderLabels(headers)
 
     def show_transaction_details(self, row, column):
-        transaction_data = []
-        headers = []
-        for col in range(self.tableWidget.columnCount()):
-            item = self.tableWidget.item(row, col)
-            header_item = self.tableWidget.horizontalHeaderItem(col)
-            if item and header_item:
-                transaction_data.append(item.text())
-                headers.append(header_item.text())
+        try:
+            transaction_id = self.tableWidget.item(row, 0).text()
+            transaction_type = self.tableWidget.item(row, 1).text()
 
-        self.dialog = TransactionDialog(transaction_data, headers)
-        self.dialog.exec_()
+            transaction_data = self.db.get_trans(transaction_id, transaction_type)
+            headers = self.db.get_trans_info(transaction_type)
 
-
+            self.dialog = TransactionDialog(transaction_data, headers)
+            self.dialog.exec_()
+        except Exception as e:
+            print(f"Error in show_transaction_details: {e}")
 
 if __name__ == "__main__":
-    import sys
+        import sys
 
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+        app = QtWidgets.QApplication(sys.argv)
+        MainWindow = QtWidgets.QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(MainWindow)
+        MainWindow.show()
+        sys.exit(app.exec_())
