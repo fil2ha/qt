@@ -148,12 +148,24 @@ class DataBase():
         return temp
 
     def reserch(self, rsh_type, rsh_str, table_name):
-        if rsh_type == '_ABC':
-            pass
-        elif rsh_type == '_ABC_':
-            pass
-        elif rsh_type == 'ABC_':
-            pass
+        self.cursor.execute(f'Pragma table_info ("{table_name}")')
+        columns = [col[1] for col in self.cursor.fetchall()]
+        if rsh_type == '_A':
+            conditions = " OR ".join(f"{col} LIKE '%{rsh_str}'" for col in columns)
+            self.cursor.execute(f"SELECT * FROM {table_name} WHERE {conditions}")
+        elif rsh_type == '_A_':
+            conditions = " OR ".join(f"{col} LIKE '%{rsh_str}%'" for col in columns)
+            self.cursor.execute(f"SELECT * FROM {table_name} WHERE {conditions}")
+        elif rsh_type == 'A_':
+            conditions = " OR ".join(f"{col} LIKE '{rsh_str}%'" for col in columns)
+            self.cursor.execute(f"SELECT * FROM {table_name} WHERE {conditions}")
+                    
+        result = self.cursor.fetchall()
+
+        if not result:
+            return []
+        else:
+            return result
 
 db = DataBase()
 
