@@ -167,10 +167,12 @@ class DataBase():
                 temp.append(__)
         return temp
 
-    def transit(self, name, ex_time, w_i_to, w_i_from, cnt):
+    def transit(self, name, ex_time, name_to, name_from, cnt):
         # Получите идентификатор товара по имени и сроку годности
         self.cursor.execute("SELECT * FROM Goods WHERE name = ? AND ex_time = ?", (name, ex_time))
         good_id = self.cursor.fetchone()[0]
+        w_i_to = db.get_wh_id(name_to)
+        w_i_from = db.get_wh_id(name_from)
         self.cursor.execute(f"SELECT * FROM GoodsWarehouse WHERE good_id = {good_id} AND warehouse_id = {w_i_to}")
         tp = self.cursor.fetchone()
 
@@ -199,6 +201,10 @@ class DataBase():
                 """, (good_id, w_i_from))
             self.connection.commit()
 
+    def get_wh_id(self, name):
+        self.cursor.execute("SELECT id FROM Warehouse WHERE name = ?",(name,))
+        return self.cursor.fetchone()[0]
+
     # ДЛЯ ФЕДИ
     def reserch(self, rsh_type, rsh_str, table_name):
         self.cursor.execute(f'Pragma table_info ("{table_name}")')
@@ -220,10 +226,9 @@ class DataBase():
         else:
             return result
 
-
         # ДЛЯ МИРОСЛАВА
 
 
 db = DataBase()
 
-db.transit('apple', 123, 1,1,1)
+
