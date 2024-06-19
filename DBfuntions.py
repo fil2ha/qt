@@ -251,7 +251,13 @@ class DataBase():
             temp.append(_)
         return temp
 
+    def get_trans_info(self, type):
+        self.cursor.execute(f'Pragma table_info ("{type}")')
+        temp = []
+        for _ in self.cursor.fetchall():
+                temp.append(_[1])
+        return temp
 
 db = DataBase()
 
-db.get_trans(1, 'acceptance')
+db.get_trans_info('acceptance')
