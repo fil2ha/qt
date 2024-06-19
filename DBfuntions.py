@@ -93,7 +93,8 @@ class DataBase():
         self.cursor.execute("INSERT INTO Transactions (type, who, time, PS) VALUES (?, ?, ?, ?)", list)
         self.connection.commit()
         self.cursor.execute("SELECT id  FROM Transactions WHERE type = ? AND who = ? AND time = ? AND PS = ?", (list[0], list[1],list[2], list[3],))
-        return self.cursor.lastrowid #получает последний id
+        return self.cursor.lastrowid
+    #получает последний id
 
     #функция, которая возвращает имена складов
     def get_wh_names(self):
@@ -240,7 +241,17 @@ class DataBase():
 
         # ДЛЯ МИРОСЛАВА
 
+    def get_trans(self, id_trans, type):
+        self.cursor.execute(f"SELECT * FROM {type} WHERE transaction_id = {id_trans}")
+        temp = list(self.cursor.fetchall()[0])
+        tm_id = temp[0]
+        query = type.lower() + '_id'
+        self.cursor.execute(f"SELECT * FROM {type+'Data'} WHERE {query} = {tm_id}")
+        for _ in self.cursor.fetchall()[0]:
+            temp.append(_)
+        return temp
+
 
 db = DataBase()
 
-
+db.get_trans(1, 'acceptance')
