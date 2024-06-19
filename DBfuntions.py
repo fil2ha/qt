@@ -258,8 +258,6 @@ class DataBase():
                 temp.append(_[1])
         return temp
 
-
-
 db = DataBase()
 
 db.get_trans_info('acceptance')
