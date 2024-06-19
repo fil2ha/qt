@@ -6,7 +6,6 @@ class DataBase():
         self.cursor = self.connection.cursor()
         self.person_id = 0
         self.person_name = ''
-
     def login_admin(self, username, password):
         self.cursor.execute("SELECT * FROM Permission WHERE login=? AND password=?", (username, password))
         user = self.cursor.fetchone()
@@ -63,7 +62,7 @@ class DataBase():
 
     # доделать
     def increase_cnt(self, list_good, cnt):
-        # [articul, name, price, ex_time, img]
+        #[articul, name, price, ex_time, img]
         self.cursor.execute("""
                 SELECT * FROM Goods WHERE name = ? AND ex_time = ?
                 """, (list_good[1], list_good[3]))
@@ -168,6 +167,38 @@ class DataBase():
                 temp.append(__)
         return temp
 
+    def transit(self, name, ex_time, w_i_to, w_i_from, cnt):
+        # Получите идентификатор товара по имени и сроку годности
+        self.cursor.execute("SELECT * FROM Goods WHERE name = ? AND ex_time = ?", (name, ex_time))
+        good_id = self.cursor.fetchone()[0]
+        self.cursor.execute(f"SELECT * FROM GoodsWarehouse WHERE good_id = {good_id} AND warehouse_id = {w_i_to}")
+        tp = self.cursor.fetchone()
+
+        if not tp:
+            # Если записи нет, добавьте новую
+            self.cursor.execute("""
+                INSERT INTO GoodsWarehouse (good_id, warehouse_id, count, expire_date, accept_date, accept_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (good_id, w_i_to, cnt, 12, 14, 1))
+            self.connection.commit()
+        else:
+            self.cursor.execute("""
+                UPDATE GoodsWarehouse 
+                SET count = count - ? 
+                WHERE good_id = ?
+                AND warehouse_id = ? 
+            """, (cnt, good_id, w_i_from))
+            self.cursor.execute(
+                f"SELECT count FROM GoodsWarehouse WHERE good_id = {good_id} AND warehouse_id = {w_i_from}")
+            current_count = self.cursor.fetchone()[0]
+            if current_count == 0:
+                self.cursor.execute("""
+                    DELETE FROM GoodsWarehouse 
+                    WHERE good_id = ?
+                    AND warehouse_id = ? 
+                """, (good_id, w_i_from))
+            self.connection.commit()
+
     # ДЛЯ ФЕДИ
     def reserch(self, rsh_type, rsh_str, table_name):
         self.cursor.execute(f'Pragma table_info ("{table_name}")')
@@ -189,9 +220,10 @@ class DataBase():
         else:
             return result
 
+
         # ДЛЯ МИРОСЛАВА
 
 
 db = DataBase()
 
-#db.increase_cnt()
+db.transit('apple', 123, 1,1,1)
