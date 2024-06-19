@@ -76,7 +76,7 @@ class Ui_MainWindow(object):
 
     def function_2(self):
         con = sqlite3.connect('srm.db', check_same_thread=False)
-        table_name = 'Store'
+        table_name = 'Warehouse'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
             pragma_answer = cur.fetchall()
@@ -136,14 +136,14 @@ class Ui_MainWindow(object):
 
     def save_changes(self):
         con = sqlite3.connect('srm.db', check_same_thread=False)
-        table_name = 'Store'
+        table_name = 'Warehouse'
         try:
             with con:
                 cur = con.cursor()
             for item_id in self.items_to_delete:
                 cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
             for item in self.items_to_add:
-                cur.executemany('''INSERT INTO Store (id, geolocation,  name) VALUES (?, ?, ?)''', (item,))
+                cur.executemany('''INSERT INTO Warehouse (id, geolocation,  name) VALUES (?, ?, ?)''', (item,))
             con.commit()
         except sqlite3.Error as e:
             print("Ошибка SQLite:", e)

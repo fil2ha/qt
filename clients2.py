@@ -18,6 +18,10 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
 
+        # Layout for filters
+        self.filterLayout = QtWidgets.QHBoxLayout()
+        self.verticalLayout.addLayout(self.filterLayout)
+
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(5, 130, 800, 421))
         self.tableWidget.setObjectName("tableWidget")
@@ -76,30 +80,60 @@ class Ui_MainWindow(object):
         self.ui.data_added1.connect(self.add_info_in)
         self.window.show()
 
-
-    #cosyak
     def function_2(self):
         con = sqlite3.connect('srm.db', check_same_thread=False)
-        table_name = 'Clients'
+        table_name = 'Client'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
             pragma_answer = cur.fetchall()
 
-            list_of_col = [i[1] for i in pragma_answer]
+            self.list_of_col = [i[1] for i in pragma_answer]
 
             cur = con.execute(f"Select * From {table_name}")
-            table_data = cur.fetchall()
-            list_of_left_rows = [str(i[0]) for i in table_data]
+            self.table_data = cur.fetchall()
+            list_of_left_rows = [str(i[0]) for i in self.table_data]
 
-            self.tableWidget.setColumnCount(len(list_of_col))
-            self.tableWidget.setHorizontalHeaderLabels(list_of_col)
+            self.tableWidget.setColumnCount(len(self.list_of_col))
+            self.tableWidget.setHorizontalHeaderLabels(self.list_of_col)
             self.tableWidget.setRowCount(len(list_of_left_rows))
             self.tableWidget.setVerticalHeaderLabels(list_of_left_rows)
 
-            for i in range(len(table_data)):
-                for j in range(len(table_data[i])):
-                    self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
-        con.commit()
+            for i in range(len(self.table_data)):
+                for j in range(len(self.table_data[i])):
+                    self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(self.table_data[i][j])))
+
+        self.add_filters()
+
+    def add_filters(self):
+        header = self.tableWidget.horizontalHeader()
+        self.filter_widgets = []
+        for column in range(self.tableWidget.columnCount()):
+            line_edit = QtWidgets.QLineEdit()
+            line_edit.setPlaceholderText(f"Фильтр {self.tableWidget.horizontalHeaderItem(column).text()}")
+            line_edit.textChanged.connect(self.apply_filter)
+            self.filter_widgets.append(line_edit)
+            self.filterLayout.addWidget(line_edit)
+            header.setSectionResizeMode(column, QtWidgets.QHeaderView.Stretch)
+
+    def apply_filter(self):
+        filters = [widget.text().lower() for widget in self.filter_widgets]
+        for row in range(self.tableWidget.rowCount()):
+            self.tableWidget.setRowHidden(row, False)
+            for column in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, column)
+                if item:
+                    if filters[column] and filters[column] not in item.text().lower():
+                        self.tableWidget.setRowHidden(row, True)
+                        break
+
+    def mark_for_deletion(self):
+        current_row = self.tableWidget.currentRow()
+        if current_row >= 0:
+            item = self.tableWidget.item(current_row, 0)
+            if item:
+                item_id = item.text()
+                self.items_to_delete.append(item_id)
+            self.tableWidget.removeRow(current_row)
 
     def add_info_in(self, name, unp, address, count, bik, bank, bank_address, ceo, email, phone, num_doc, more):
         max_id = 0
@@ -150,29 +184,19 @@ class Ui_MainWindow(object):
         self.items_to_add.append(
             (new_id, name, unp, address, count, bik, bank, bank_address, ceo, email, phone, num_doc, more))
 
-    def mark_for_deletion(self):
-        current_row = self.tableWidget.currentRow()
-        if current_row >= 0:
-            item = self.tableWidget.item(current_row, 0)
-            if item:
-                item_id = item.text()
-                self.items_to_delete.append(item_id)
-            self.tableWidget.removeRow(current_row)
-
-    #COSYAK
     def save_changes(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
-        table_name = 'Clients'
+        con = sqlite3.connect('srm.db', check_same_thread=False)
+        table_name = 'Client'
         try:
             with con:
                 cur = con.cursor()
-            for item_id in self.items_to_delete:
-                cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
-            for item in self.items_to_add:
-                cur.executemany(
-                    '''INSERT INTO Clients (id, name, ind_number, ceo, phone, email, address, current_account, bank, bik, bank_address, info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                    (item,))
-            con.commit()
+                for item_id in self.items_to_delete:
+                    cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
+                for item in self.items_to_add:
+                    cur.executemany(
+                        '''INSERT INTO Client (id, name, ind_number, ceo, phone, email, address, current_account, bank, bik, bank_address, info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                        (item,))
+                con.commit()
         except sqlite3.Error as e:
             print("Ошибка SQLite:", e)
 
@@ -183,6 +207,7 @@ class Ui_MainWindow(object):
         con.commit()
 
 if __name__ == "__main__":
+    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

@@ -74,7 +74,7 @@ class Ui_MainWindow(object):
         # if not table_name:
         #     table_name = self.comboBox.currentText()
         con = sqlite3.connect('srm.db', check_same_thread=False)
-        table_name = 'Personal'
+        table_name = 'Person'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
             pragma_answer = cur.fetchall()
