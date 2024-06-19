@@ -62,11 +62,24 @@ class DataBase():
         self.connection.commit()
 
     # доделать
-    def increase_cnt(self, list_good, list_warehouse):
+    def increase_cnt(self, list_good, cnt):
+        #[articul, name, price, ex_time, img]
         self.cursor.execute(f"""
                                 SELECT * FROM Goods WHERE name = ? AND ex_time = ? VALUES(?, ?)
-                            """, )
-        self.connection.commit()
+                            """, (list_good[1], list_good[3]))
+        temp = self.cursor.fetchall()
+        if temp:
+            self.cursor.execute(f"""
+                                            UPDATE GoodsWarehouse 
+                                            SET count = count + ? 
+                                            WHERE id IN (
+                                                SELECT id FROM Goods 
+                                                WHERE name = ? AND ex_time = ?
+                                        )""", (cnt, list_good[1], list_good[3]))
+            self.connection.commit()
+        else:
+            self.cursor.execute("INSERT INTO Goods ()")
+
 
     # функция для добавления транзакции и возвращегия id этой транзакции
     def insert_transact(self, list):
@@ -122,7 +135,7 @@ class DataBase():
         self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (list_wod[0], list_wod[1]))
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute(
-            "INSERT INTO WritOffData (good_id, acceptance_id, count, expire_date) VALUES (?, ?, ?, ?)",
+            "INSERT INTO WritOffData (good_id,  write_of_id, count, expire_date) VALUES (?, ?, ?, ?)",
             (temp_good_id, list_wod[2], list_wod[3], list_wod[4]))
         self.connection.commit()
 
@@ -147,6 +160,7 @@ class DataBase():
                 temp.append(__)
         return temp
 
+    # ДЛЯ ФЕДИ
     def reserch(self, rsh_type, rsh_str, table_name):
         self.cursor.execute(f'Pragma table_info ("{table_name}")')
         columns = [col[1] for col in self.cursor.fetchall()]
@@ -167,5 +181,9 @@ class DataBase():
         else:
             return result
 
+        # ДЛЯ МИРОСЛАВА
+
+
 db = DataBase()
 
+#db.increase_cnt()
