@@ -159,7 +159,7 @@ class Ui_MainWindow(object):
             for item_id in self.items_to_delete:
                 cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
             for item in self.items_to_add:
-                cur.executemany('''INSERT INTO Product (id, name, quantity, price, store_id, description, image) VALUES (?, ?, ?, ?, ?, ?, ?)''', (item,))
+                cur.executemany('''INSERT INTO Goods (id, name, quantity, price, store_id, description, image) VALUES (?, ?, ?, ?, ?, ?, ?)''', (item,))
             con.commit()
         except sqlite3.Error as e:
             print("Ошибка SQLite:", e)
