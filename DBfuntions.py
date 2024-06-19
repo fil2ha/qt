@@ -56,7 +56,7 @@ class DataBase():
                                 SET count = count - ? 
                                 WHERE id IN (
                                 SELECT id FROM Goods 
-                                WHERE name = ? AND ex_time = ?
+                                WHERE name = ? AND ex_time = ? 
                             )""", (cnt, name, ex_time))
         self.connection.commit()
 
@@ -263,4 +263,3 @@ class DataBase():
         return temp
 
 db = DataBase()
-
