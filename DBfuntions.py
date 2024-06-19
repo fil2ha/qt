@@ -63,26 +63,30 @@ class DataBase():
 
     # доделать
     def increase_cnt(self, list_good, cnt):
-        #[articul, name, price, ex_time, img]
-        self.cursor.execute(f"""
-                                SELECT * FROM Goods WHERE name = ? AND ex_time = ? VALUES(?, ?)
-                            """, (list_good[1], list_good[3]))
+        # [articul, name, price, ex_time, img]
+        self.cursor.execute("""
+                SELECT * FROM Goods WHERE name = ? AND ex_time = ?
+                """, (list_good[1], list_good[3]))
         temp = self.cursor.fetchall()
         if temp:
-            self.cursor.execute(f"""
-                                            UPDATE GoodsWarehouse 
-                                            SET count = count + ? 
-                                            WHERE id IN (
-                                                SELECT id FROM Goods 
-                                                WHERE name = ? AND ex_time = ?
-                                        )""", (cnt, list_good[1], list_good[3]))
+            self.cursor.execute("""
+                UPDATE GoodsWarehouse 
+                SET count = count + ? 
+                WHERE id IN (
+                    SELECT id FROM Goods 
+                    WHERE name = ? AND ex_time = ?
+                )
+            """, (cnt, list_good[1], list_good[3]))
             self.connection.commit()
         else:
-            self.cursor.execute("INSERT INTO Goods (articul, name, price, ex_time, img) VALUES(?, ?, ?, ?, ?)",
-                                list_good)
+            self.cursor.execute("""
+                INSERT INTO Goods (articul, name, price, ex_time, img) VALUES (?, ?, ?, ?, ?)
+            """, list_good)
             id = self.cursor.lastrowid
-            self.cursor.execute("INSERT INTO GoodsWarehouse  ( good_id, warehouse_id, count, expire_date, accept_date, accept_id) VALUES(?, ?, ?, ?, ?, ?)",
-                                (id, 1, cnt, 1, 1, 1))
+            self.cursor.execute("""
+                INSERT INTO GoodsWarehouse (good_id, warehouse_id, count, expire_date, accept_date, accept_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (id, 1, cnt, 1, 1, 1))
             self.connection.commit()
 
     # функция для добавления транзакции и возвращегия id этой транзакции
