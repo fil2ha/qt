@@ -78,8 +78,12 @@ class DataBase():
                                         )""", (cnt, list_good[1], list_good[3]))
             self.connection.commit()
         else:
-            self.cursor.execute("INSERT INTO Goods ()")
-
+            self.cursor.execute("INSERT INTO Goods (articul, name, price, ex_time, img) VALUES(?, ?, ?, ?, ?)",
+                                list_good)
+            id = self.cursor.lastrowid
+            self.cursor.execute("INSERT INTO GoodsWarehouse  ( good_id, warehouse_id, count, expire_date, accept_date, accept_id) VALUES(?, ?, ?, ?, ?, ?)",
+                                (id, 1, cnt, 1, 1, 1))
+            self.connection.commit()
 
     # функция для добавления транзакции и возвращегия id этой транзакции
     def insert_transact(self, list):
@@ -135,7 +139,7 @@ class DataBase():
         self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (list_wod[0], list_wod[1]))
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute(
-            "INSERT INTO WritOffData (good_id,  write_of_id, count, expire_date) VALUES (?, ?, ?, ?)",
+            "INSERT INTO WriteOffData (good_id,  write_of_id, count, expire_date) VALUES (?, ?, ?, ?)",
             (temp_good_id, list_wod[2], list_wod[3], list_wod[4]))
         self.connection.commit()
 
