@@ -141,8 +141,10 @@ class Ui_Dialog(QtWidgets.QDialog):
             person_id = self.person[0]
             now = datetime.datetime.now()
             transaction_id = db.insert_transact(['Списать', person_id, now, ''])
+            write_off_id = db.insert_wo([transaction_id, person_id])
             for data_row in data_lst:
                 db.decrease_cnt(data_row[1], data_row[3], data_row[4])
+                db.insert_wod([data_row[1], data_row[3], write_off_id, data_row[4], data_row[3]])
 
             self.log_data = 'Проведена операция "Списать". '
             self.close()
