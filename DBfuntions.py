@@ -147,13 +147,13 @@ class DataBase():
                 temp.append(__)
         return temp
 
-
+    def reserch(self, rsh_type, rsh_str, table_name):
+        if rsh_type == '_ABC':
+            pass
+        elif rsh_type == '_ABC_':
+            pass
+        elif rsh_type == 'ABC_':
+            pass
 
 db = DataBase()
-
-
-
-
-
-
 
