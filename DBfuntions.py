@@ -256,8 +256,11 @@ class DataBase():
         temp = []
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
-        return temp
+        query = type+'Data'
+        self.cursor.execute(f'Pragma table_info ("{query}")')
+        for _ in self.cursor.fetchall():
+                temp.append(_[1])
+        print(temp)
 
 db = DataBase()
 
-db.get_trans_info('acceptance')
