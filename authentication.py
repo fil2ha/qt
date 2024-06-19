@@ -1,10 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-import sqlite3
 import main
+from DBfuntions import db
 
-person_id = 0
-person_name = ''
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -42,34 +40,23 @@ class Ui_MainWindow(object):
         self.pushButton_OK.setText(_translate("MainWindow", "Войти"))
         self.pushButton_dont.setText(_translate("MainWindow", "Отмена"))
 
+    #повозиться
     def authenticate(self):
         username = self.login.text()
         password = self.password.text()
-
-        connection = sqlite3.connect('database.db', check_same_thread=False)
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM Permissions WHERE login=? AND password=?", (username, password))
-        user = cursor.fetchone()
-
-        if user:
-            #добавть id, добавить имя
+        temp = db.login_admin(username, password)
+        if temp:
             self.open_main()
-
             MainWindow.close()
-
         else:
             QMessageBox.warning(None, "Ошибка", "Логин или пароль введены неверно!")
             print("Ошибка авторизации")
-
-        connection.close()
-
 
     def open_main(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = main.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-
 
 if __name__ == "__main__":
     import sys

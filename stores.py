@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
         self.window.show()
 
     def function_2(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
+        con = sqlite3.connect('srm.db', check_same_thread=False)
         table_name = 'Store'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
@@ -135,7 +135,7 @@ class Ui_MainWindow(object):
             self.tableWidget.removeRow(current_row)
 
     def save_changes(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
+        con = sqlite3.connect('srm.db', check_same_thread=False)
         table_name = 'Store'
         try:
             with con:

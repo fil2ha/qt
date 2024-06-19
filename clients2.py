@@ -77,8 +77,9 @@ class Ui_MainWindow(object):
         self.window.show()
 
 
+    #cosyak
     def function_2(self):
-        con = sqlite3.connect('database.db', check_same_thread=False)
+        con = sqlite3.connect('srm.db', check_same_thread=False)
         table_name = 'Clients'
         with con:
             cur = con.execute(f"Pragma table_info ('{table_name}')")
@@ -158,6 +159,7 @@ class Ui_MainWindow(object):
                 self.items_to_delete.append(item_id)
             self.tableWidget.removeRow(current_row)
 
+    #COSYAK
     def save_changes(self):
         con = sqlite3.connect('database.db', check_same_thread=False)
         table_name = 'Clients'
