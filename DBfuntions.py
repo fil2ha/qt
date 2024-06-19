@@ -177,6 +177,12 @@ class DataBase():
         tp = self.cursor.fetchone()
 
         if not tp:
+            self.cursor.execute("""
+                            UPDATE GoodsWarehouse 
+                            SET count = count - ? 
+                            WHERE good_id = ?
+                            AND warehouse_id = ? 
+                        """, (cnt, good_id, w_i_from))
             # Если записи нет, добавьте новую
             self.cursor.execute("""
                 INSERT INTO GoodsWarehouse (good_id, warehouse_id, count, expire_date, accept_date, accept_id)
@@ -190,6 +196,12 @@ class DataBase():
                 WHERE good_id = ?
                 AND warehouse_id = ? 
             """, (cnt, good_id, w_i_from))
+            self.cursor.execute("""
+                            UPDATE GoodsWarehouse 
+                            SET count = count + ? 
+                            WHERE good_id = ?
+                            AND warehouse_id = ? 
+                        """, (cnt, good_id, w_i_to))
             self.cursor.execute(
                 f"SELECT count FROM GoodsWarehouse WHERE good_id = {good_id} AND warehouse_id = {w_i_from}")
             current_count = self.cursor.fetchone()[0]
