@@ -139,10 +139,13 @@ class Ui_Dialog(QtWidgets.QDialog):
         if self.quantity_check():  # если введенное количество не больше того, что есть на складе
             data_lst = self.data_from_table2()
             person_id = self.person[0]
+            client = self.comboBox.currentText()
             now = datetime.datetime.now()
             transaction_id = db.insert_transact(['Принять', person_id, now, ''])
+            acceptance_id = db.insert_accept([transaction_id, person_id, client])
             for data_row in data_lst:
-                pass
+                db.increase_cnt([data_row[0], data_row[1], data_row[2], data_row[3], ''], data_row[4])
+                db.insert_accData([data_row[1], data_row[3], acceptance_id, data_row[4], data_row[3]])
 
             self.log_data = 'Проведена операция "Принять". '
             self.close()
