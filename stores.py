@@ -20,7 +20,7 @@ class Ui_MainWindow(object):
         self.tableWidget.setGeometry(QtCore.QRect(5, 130, 800, 421))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(3)
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Координаты", "Название склада"])
+        self.tableWidget.setHorizontalHeaderLabels([])
         self.verticalLayout.addWidget(self.tableWidget)
 
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -97,7 +97,7 @@ class Ui_MainWindow(object):
                     self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
         con.commit()
 
-    def add_info_in(self, coor, geo):
+    def add_info_in(self, name, coordinates_a, coordinates_b, adress):
         max_id = 0
         row_count = self.tableWidget.rowCount()
 
@@ -116,14 +116,18 @@ class Ui_MainWindow(object):
         self.tableWidget.insertRow(row_count)
 
         id_item = QtWidgets.QTableWidgetItem(str(new_id))
-        coor_item = QtWidgets.QTableWidgetItem(coor)
-        geo_item = QtWidgets.QTableWidgetItem(geo)
+        name_item = QtWidgets.QTableWidgetItem(name)
+        coordinates_a_item = QtWidgets.QTableWidgetItem(coordinates_a)
+        coordinates_b_item = QtWidgets.QTableWidgetItem(coordinates_b)
+        adress_item = QtWidgets.QTableWidgetItem(adress)
 
         self.tableWidget.setItem(row_count, 0, id_item)
-        self.tableWidget.setItem(row_count, 1, geo_item)
-        self.tableWidget.setItem(row_count, 2, coor_item)
+        self.tableWidget.setItem(row_count, 1, name_item)
+        self.tableWidget.setItem(row_count, 2, coordinates_a_item)
+        self.tableWidget.setItem(row_count, 3, coordinates_b_item)
+        self.tableWidget.setItem(row_count, 4, adress_item)
 
-        self.items_to_add.append((new_id, coor, geo))
+        self.items_to_add.append((new_id, name, coordinates_a, coordinates_b, adress))
 
     def mark_for_deletion(self):
         current_row = self.tableWidget.currentRow()
@@ -143,7 +147,7 @@ class Ui_MainWindow(object):
             for item_id in self.items_to_delete:
                 cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
             for item in self.items_to_add:
-                cur.executemany('''INSERT INTO Warehouse (id, geolocation,  name) VALUES (?, ?, ?)''', (item,))
+                cur.executemany('''INSERT INTO Warehouse (id, name, coordinates_a, coordinates_b, adress) VALUES (?, ?, ?, ?, ?)''', (item,))
             con.commit()
         except sqlite3.Error as e:
             print("Ошибка SQLite:", e)
