@@ -1,7 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
+class Ui_MainWindow(QtCore.QObject):
+    data_added = QtCore.pyqtSignal(str, str, str, str)
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(739, 461)
@@ -55,6 +56,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.pushButton_add_info_person.clicked.connect(self.add_info)
         self.pushButton_cancel.clicked.connect(MainWindow.close)
 
     def retranslateUi(self, MainWindow):
@@ -66,6 +68,20 @@ class Ui_MainWindow(object):
         self.checkBox_per_2.setText(_translate("MainWindow", "УСТАНОВИТЬ ДОСТУП"))
         self.checkBox_per_3.setText(_translate("MainWindow", "УСТАНОВИТЬ ДОСТУП"))
         self.checkBox_per_4.setText(_translate("MainWindow", "УСТАНОВИТЬ ДОСТУП"))
+
+    def add_info(self):
+        name = self.lineEdit.text()
+        phone = self.lineEdit_2.text()
+        address = self.lineEdit_3.text()
+        info = self.lineEdit_4.text()
+
+        self.data_added.emit(name, phone, address, info)
+        self.lineEdit.clear()
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+
+        self.centralwidget.window().close()
 
 
 if __name__ == "__main__":

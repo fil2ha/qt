@@ -16,11 +16,16 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
 
+        # Layout for filters
+        self.filterLayout = QtWidgets.QHBoxLayout()
+        self.verticalLayout.addLayout(self.filterLayout)
+
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(5, 130, 800, 421))
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(0)
-        self.tableWidget.setRowCount(0)
+        self.tableWidget.setColumnCount(4)
+        # self.tableWidget.setRowCount(0)
+        self.tableWidget.setHorizontalHeaderLabels([])
         self.verticalLayout.addWidget(self.tableWidget)
 
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -46,14 +51,19 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-
         self.Cancel.clicked.connect(MainWindow.close)
         self.Add.clicked.connect(self.add_person)
-        self.Delete.clicked.connect(self.ff)
+        # self.Delete.clicked.connect(self.ff)
+        self.Delete.clicked.connect(self.mark_for_deletion)
+        self.OK.clicked.connect(self.save_changes)
         self.function_2()
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        self.items_to_add = []
+        self.items_to_delete = []
+        self.main_window = MainWindow
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -63,11 +73,13 @@ class Ui_MainWindow(object):
         self.Add.setText(_translate("MainWindow", "ДОБАВИТЬ"))
         self.OK.setText(_translate("MainWindow", "СОХРАНИТЬ"))
 
-
     def add_person(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = add_person_with_permission.Ui_MainWindow()
         self.ui.setupUi(self.window)
+        print('personal')
+        self.ui.data_added.connect(self.add_info_in)
+        print('add_person')
         self.window.show()
 
     def function_2(self):
@@ -95,11 +107,98 @@ class Ui_MainWindow(object):
                 for j in range(len(table_data[i])):
                     self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
 
-    def ff(self):
-        self.tableWidget.removeRow(self.tableWidget.currentRow())
+        con.close()
+        self.add_filters()
+
+    def add_filters(self):
+        header = self.tableWidget.horizontalHeader()
+        self.filter_widgets = []
+        for column in range(self.tableWidget.columnCount()):
+            line_edit = QtWidgets.QLineEdit()
+            line_edit.setPlaceholderText(f"Фильтр {self.tableWidget.horizontalHeaderItem(column).text()}")
+            line_edit.textChanged.connect(self.apply_filter)
+            self.filter_widgets.append(line_edit)
+            self.filterLayout.addWidget(line_edit)
+            header.setSectionResizeMode(column, QtWidgets.QHeaderView.Stretch)
+
+    def apply_filter(self):
+        filters = [widget.text().lower() for widget in self.filter_widgets]
+        for row in range(self.tableWidget.rowCount()):
+            self.tableWidget.setRowHidden(row, False)
+            for column in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, column)
+                if item:
+                    if filters[column] and filters[column] not in item.text().lower():
+                        self.tableWidget.setRowHidden(row, True)
+                        break
+
+    def add_info_in(self, name, phone, address, info):
+        print('Full add')
+        max_id = 0
+        row_count = self.tableWidget.rowCount()
+
+        for row in range(row_count):
+            item = self.tableWidget.item(row, 0)
+            if item is not None:
+                try:
+                    current_id = int(item.text())
+                    if current_id > max_id:
+                        max_id = current_id
+                except ValueError:
+                    continue
+
+        new_id = max_id + 1
+
+        self.tableWidget.insertRow(row_count)
+
+        id_item = QtWidgets.QTableWidgetItem(str(new_id))
+        name_item = QtWidgets.QTableWidgetItem(name)
+        phone_item = QtWidgets.QTableWidgetItem(phone)
+        address_item = QtWidgets.QTableWidgetItem(address)
+        info_item = QtWidgets.QTableWidgetItem(info)
+
+        self.tableWidget.setItem(row_count, 0, id_item)
+        self.tableWidget.setItem(row_count, 1, name_item)
+        self.tableWidget.setItem(row_count, 2, phone_item)
+        self.tableWidget.setItem(row_count, 3, address_item)
+        self.tableWidget.setItem(row_count, 4, info_item)
+
+        self.items_to_add.append((new_id, name, phone, address, info))
+
+    def mark_for_deletion(self):
+        current_row = self.tableWidget.currentRow()
+        if current_row >= 0:
+            item = self.tableWidget.item(current_row, 0)
+            if item:
+                item_id = item.text()
+                self.items_to_delete.append(item_id)
+            self.tableWidget.removeRow(current_row)
+
+    def save_changes(self):
+        con = sqlite3.connect('srm.db', check_same_thread=False)
+        table_name = 'Person'
+        try:
+            with con:
+                cur = con.cursor()
+            for item_id in self.items_to_delete:
+                cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
+            for item in self.items_to_add:
+                cur.executemany(
+                    '''INSERT INTO Person (id, name, phone, address, info) VALUES (?, ?, ?, ?, ?)''', (item,))
+            con.commit()
+        except sqlite3.Error as e:
+            print("Ошибка SQLite:", e)
+
+        self.items_to_add.clear()
+        self.items_to_delete.clear()
+
+        self.main_window.close()
+
+
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
