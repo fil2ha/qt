@@ -1,4 +1,3 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
 import main_admin_add_product
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 import sqlite3
@@ -7,7 +6,7 @@ import sqlite3
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(985, 983)
+        MainWindow.resize(985, 783)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.widget = QtWidgets.QWidget(self.centralwidget)
@@ -17,11 +16,16 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
 
+        # Layout for filters
+        self.filterLayout = QtWidgets.QHBoxLayout()
+        self.verticalLayout.addLayout(self.filterLayout)
+
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(5, 130, 800, 421))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(7)
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Название", "Количество", "Цена", "Изображение", "Описание", "Склад"])
+        self.tableWidget.setHorizontalHeaderLabels([])
+        # self.tableWidget.setHorizontalHeaderLabels(["ID", "Название", "Количество", "Цена", "Изображение", "Описание", "Склад"])
         self.verticalLayout.addWidget(self.tableWidget)
 
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -47,9 +51,8 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-
         self.Cancel.clicked.connect(MainWindow.close)
-        self.Add.clicked.connect(self.add_person)
+        self.Add.clicked.connect(self.add_product)
         self.Delete.clicked.connect(self.mark_for_deletion)
         self.OK.clicked.connect(self.save_changes)
         self.function_2()
@@ -69,16 +72,14 @@ class Ui_MainWindow(object):
         self.Add.setText(_translate("MainWindow", "ДОБАВИТЬ"))
         self.OK.setText(_translate("MainWindow", "СОХРАНИТЬ"))
 
-
-    def add_person(self):
+    def add_product(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = main_admin_add_product.Ui_MainWindow()
         self.ui.setupUi(self.window)
         print('4')
-        self.ui.data_addedd.connect(self.add_info_in)
+        self.ui.data_added.connect(self.add_info_in)
         print('5')
         self.window.show()
-
 
     def function_2(self):
         con = sqlite3.connect('srm.db', check_same_thread=False)
@@ -102,8 +103,31 @@ class Ui_MainWindow(object):
                 for j in range(len(table_data[i])):
                     self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
         con.close()
+        self.add_filters()
 
-    def add_info_inn(self, name, amount, price, image, desc, store):
+    def add_filters(self):
+        header = self.tableWidget.horizontalHeader()
+        self.filter_widgets = []
+        for column in range(self.tableWidget.columnCount()):
+            line_edit = QtWidgets.QLineEdit()
+            line_edit.setPlaceholderText(f"Фильтр {self.tableWidget.horizontalHeaderItem(column).text()}")
+            line_edit.textChanged.connect(self.apply_filter)
+            self.filter_widgets.append(line_edit)
+            self.filterLayout.addWidget(line_edit)
+            header.setSectionResizeMode(column, QtWidgets.QHeaderView.Stretch)
+
+    def apply_filter(self):
+        filters = [widget.text().lower() for widget in self.filter_widgets]
+        for row in range(self.tableWidget.rowCount()):
+            self.tableWidget.setRowHidden(row, False)
+            for column in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, column)
+                if item:
+                    if filters[column] and filters[column] not in item.text().lower():
+                        self.tableWidget.setRowHidden(row, True)
+                        break
+
+    def add_info_in(self, name, articul, price, ex_time, img):
         print('6')
         max_id = 0
         row_count = self.tableWidget.rowCount()
@@ -124,22 +148,21 @@ class Ui_MainWindow(object):
 
         id_item = QtWidgets.QTableWidgetItem(str(new_id))
         name_item = QtWidgets.QTableWidgetItem(name)
-        amount_item = QtWidgets.QTableWidgetItem(str(amount))
-        price_item = QtWidgets.QTableWidgetItem(str(price))
-        image_item = QtWidgets.QTableWidgetItem(image)
-        desc_item = QtWidgets.QTableWidgetItem(desc)
-        store_item = QtWidgets.QTableWidgetItem(str(store))
+        articul_item = QtWidgets.QTableWidgetItem(articul)
+        price_item = QtWidgets.QTableWidgetItem(price)
+        ex_time_item = QtWidgets.QTableWidgetItem(ex_time)
+        img_item = QtWidgets.QTableWidgetItem(img)
+        # store_item = QtWidgets.QTableWidgetItem(str(store))
 
         self.tableWidget.setItem(row_count, 0, id_item)
         self.tableWidget.setItem(row_count, 1, name_item)
-        self.tableWidget.setItem(row_count, 2, amount_item)
+        self.tableWidget.setItem(row_count, 2, articul_item)
         self.tableWidget.setItem(row_count, 3, price_item)
-        self.tableWidget.setItem(row_count, 4, store_item)
-        self.tableWidget.setItem(row_count, 5, desc_item)
-        self.tableWidget.setItem(row_count, 6, image_item)
+        self.tableWidget.setItem(row_count, 4, ex_time_item)
+        self.tableWidget.setItem(row_count, 5, img_item)
+        # self.tableWidget.setItem(row_count, 6, image_item)
 
-
-        self.items_to_add.append((new_id, name, amount, price, store, desc, image))
+        self.items_to_add.append((new_id, name, articul, price, ex_time, img))
 
     def mark_for_deletion(self):
         current_row = self.tableWidget.currentRow()
@@ -159,7 +182,8 @@ class Ui_MainWindow(object):
             for item_id in self.items_to_delete:
                 cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
             for item in self.items_to_add:
-                cur.executemany('''INSERT INTO Goods (id, name, quantity, price, store_id, description, image) VALUES (?, ?, ?, ?, ?, ?, ?)''', (item,))
+                cur.executemany(
+                    '''INSERT INTO Goods (id, name, articul, price, ex_time, img) VALUES (?, ?, ?, ?, ?, ?)''', (item,))
             con.commit()
         except sqlite3.Error as e:
             print("Ошибка SQLite:", e)
@@ -172,6 +196,7 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 
 
 class Ui_MainWindow(QtCore.QObject):
-    data_added = QtCore.pyqtSignal(str, str, str, str,)
+    data_added = QtCore.pyqtSignal(str, str, str, str)
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -25,22 +25,26 @@ class Ui_MainWindow(QtCore.QObject):
         self.lineEdit_2 = QtWidgets.QLineEdit(self.widget)
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit_2.setPlaceholderText("Название склада")
+        # self.lineEdit_2.setGeometry(QtCore.QRect(30, 30, 671, 41))
         self.verticalLayout.addWidget(self.lineEdit_2)
 
         self.lineEdit = QtWidgets.QLineEdit(self.widget)
         self.lineEdit.setObjectName("lineEdit")
         self.lineEdit.setPlaceholderText("Координата а")
+        # self.lineEdit.setGeometry(QtCore.QRect(30, 90, 671, 41))
         self.verticalLayout.addWidget(self.lineEdit)
 
-        self.lineEdit3 = QtWidgets.QLineEdit(self.widget)
-        self.lineEdit3.setObjectName("lineEdit")
-        self.lineEdit3.setPlaceholderText("Координата b")
-        self.verticalLayout.addWidget(self.lineEdit3)
+        self.lineEdit_3 = QtWidgets.QLineEdit(self.widget)
+        self.lineEdit_3.setObjectName("lineEdit")
+        self.lineEdit_3.setPlaceholderText("Координата b")
+        # self.lineEdit3.setGeometry(QtCore.QRect(30, 150, 671, 41))
+        self.verticalLayout.addWidget(self.lineEdit_3)
 
-        self.lineEdit4 = QtWidgets.QLineEdit(self.widget)
-        self.lineEdit4.setObjectName("lineEdit")
-        self.lineEdit4.setPlaceholderText("Адрес")
-        self.verticalLayout.addWidget(self.lineEdit4)
+        self.lineEdit_4 = QtWidgets.QLineEdit(self.widget)
+        self.lineEdit_4.setObjectName("lineEdit")
+        self.lineEdit_4.setPlaceholderText("Адрес")
+        # self.lineEdit4.setGeometry(QtCore.QRect(30, 210, 671, 41))
+        self.verticalLayout.addWidget(self.lineEdit_4)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -62,11 +66,13 @@ class Ui_MainWindow(QtCore.QObject):
     def add_info(self):
         coordinates_a = self.lineEdit.text()
         name = self.lineEdit_2.text()
-        coordinates_b = self.lineEdit3.text()
-        adress = self.lineEdit4.text()
+        coordinates_b = self.lineEdit_3.text()
+        adress = self.lineEdit_4.text()
         self.data_added.emit(name, coordinates_a, coordinates_b, adress)
         self.lineEdit.clear()
         self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
 
         self.centralwidget.window().close()
 

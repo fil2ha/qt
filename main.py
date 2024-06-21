@@ -1,11 +1,13 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-import clients2, products, stores, personal, spis, replac, buy, sell
-import sqlite3
+import clients2, products, stores, personal, sell, acceptance, writeoff, transportation
+import sqlite3  # Не забудьте импортировать sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
 from DBfuntions import db, DataBase
+from documents import generate_document  # Импортируем функцию из другого файла
 
 
 class TransactionDialog(QtWidgets.QDialog):
@@ -21,6 +23,7 @@ class TransactionDialog(QtWidgets.QDialog):
             layout.addWidget(label)
 
         self.setLayout(layout)
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -43,16 +46,16 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
-
+        self.tableWidget.itemSelectionChanged.connect(self.on_item_selection_changed)
 
         # self.tableView = QtWidgets.QTableView(self.centralwidget)
         # self.tableView.setGeometry(QtCore.QRect(30, 150, 1061, 491))
         # self.tableView.setObjectName("tableView")
 
-
         self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit_2.setGeometry(QtCore.QRect(30, 650, 841, 61))
         self.lineEdit_2.setObjectName("lineEdit_2")
+
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(80, 30, 931, 81))
         self.widget.setObjectName("widget")
@@ -133,8 +136,11 @@ class Ui_MainWindow(object):
         self.pushButton_get.clicked.connect(self.show_get)
         self.pushButton_post.clicked.connect(self.show_post)
         self.pushButton_exit.clicked.connect(MainWindow.close)
+        self.pushButton_documents.clicked.connect(self.open_documents)  # Подключаем новую функцию
 
-        self.db =DataBase()
+        self.selected_row_data = []  # Инициализация атрибута для хранения данных выбранной строки
+
+        self.db = DataBase()
         self.database1()
         self.tableWidget.cellClicked.connect(self.show_transaction_details)
 
@@ -159,50 +165,45 @@ class Ui_MainWindow(object):
         self.ui = clients2.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-        pass
 
     def show_personal(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = personal.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-        pass
-
 
     def show_product(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = products.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-        pass
 
     def show_stores(self):
         self.window = QtWidgets.QMainWindow()
         self.ui = stores.Ui_MainWindow()
         self.ui.setupUi(self.window)
         self.window.show()
-        pass
 
     def show_change(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = replac.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
-        pass
+        self.ui = transportation.Ui_Dialog()
+        data = self.ui.exec_()
+        line_text = self.lineEdit_2.text()
+        line_text += data
+        self.lineEdit_2.setText(line_text)
 
     def show_del(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = spis.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
-        pass
+        self.ui = writeoff.Ui_Dialog()
+        data = self.ui.exec_()
+        line_text = self.lineEdit_2.text()
+        line_text += data
+        self.lineEdit_2.setText(line_text)
 
     def show_get(self):
-        self.window = QtWidgets.QMainWindow()
-        self.ui = buy.Ui_MainWindow()
-        self.ui.setupUi(self.window)
-        self.window.show()
-        pass
+        self.ui = acceptance.Ui_Dialog()
+        data = self.ui.exec_()
+        line_text = self.lineEdit_2.text()
+        line_text += data
+        self.lineEdit_2.setText(line_text)
 
     def show_post(self):
         self.ui = sell.Ui_Dialog()
@@ -210,7 +211,83 @@ class Ui_MainWindow(object):
         line_text = self.lineEdit_2.text()
         line_text += data
         self.lineEdit_2.setText(line_text)
-        pass
+
+    # def database1(self):
+    #     con = sqlite3.connect('srm.db', check_same_thread=False)
+    #     table_name = 'Transactions'
+    #     with con:
+    #         cur = con.execute(f"Pragma table_info ('{table_name}')")
+    #         pragma_answer = cur.fetchall()
+    #
+    #         list_of_col = [i[1] for i in pragma_answer]
+    #
+    #         cur = con.execute(f"Select * From {table_name}")
+    #         table_data = cur.fetchall()
+    #         list_of_left_rows = [str(i[0]) for i in table_data]
+    #
+    #         self.tableWidget.setColumnCount(len(list_of_col))
+    #         self.tableWidget.setHorizontalHeaderLabels(list_of_col)
+    #         self.tableWidget.setRowCount(len(list_of_left_rows))
+    #         self.tableWidget.setVerticalHeaderLabels(list_of_left_rows)
+    #
+    #         for i in range(len(table_data)):
+    #             for j in range(len(table_data[i])):
+    #                 self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
+
+    def open_documents(self):
+        # Показать диалог выбора операции
+        # Здесь можно реализовать логику выбора операции пользователем
+        # operations = "Продажа"  # Пример операции "человеческой", может быть изменено на выбор пользователя
+
+        id_transaction = self.selected_row_data[0]
+        print(id_transaction)
+        list_data_transaction = db.get_transaction_by_id(id_transaction)
+        operations = list_data_transaction[0][1]
+        print(list_data_transaction)
+        print(operations)
+
+        # Генерируем документ с использованием данных выбранной строки
+        generate_document(operations, list_data_transaction[0])
+
+        # Устанавливаем текст в lineEdit_2
+        self.lineEdit_2.setText(
+            f"Сформирован документ по транзакции - {operations}. Некоторые чекануться, а кто-то даже охереет!")
+
+    """метод on_item_selection_changed, который вызывается при изменении выделения в tableWidget. В этом методе 
+    получаются данные из выделенной строки и выводятся в консоль"""
+
+    def on_item_selection_changed(self):
+        selected_items = self.tableWidget.selectedItems()
+        if selected_items:
+            selected_row = selected_items[0].row()
+            self.selected_row_data = []
+            for column in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(selected_row, column)
+                if item:
+                    self.selected_row_data.append(item.text())
+            print("Selected row data:", self.selected_row_data)
+
+    # def open_documents(self):
+    #
+    #     options = QtWidgets.QFileDialog.Options()
+    #     fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Выберите документ", "", "All Files (*);;Word Files "
+    #                                                                                        "(*.docx);;Excel Files ("
+    #                                                                                        "*.xlsx)", options=options)
+    #     if fileName:
+    #         try:
+    #             os.startfile(fileName)
+    #         except Exception as e:
+    #             print(f"Не удалось открыть файл {fileName}. Ошибка: {e}")
+
+    # def open_documents(self):
+    #     # Показать диалог выбора операции
+    #     operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
+    #     operation, ok = QtWidgets.QInputDialog.getItem(None, "Выберите операцию", "Операция:", operations, 0, False)
+    #     if ok and operation:
+    #         try:
+    #             generate_document(operation)
+    #         except Exception as e:
+    #             QtWidgets.QMessageBox.critical(None, "Ошибка", f"Не удалось создать документ. Ошибка: {e}")
 
     def database1(self):
         self.conn = sqlite3.connect('srm.db')
@@ -222,7 +299,6 @@ class Ui_MainWindow(object):
         if data:
             self.tableWidget.setRowCount(len(data))
             self.tableWidget.setColumnCount(len(data[0]))
-
 
             for row_idx, row_data in enumerate(data):
                 for col_idx, col_data in enumerate(row_data):
@@ -244,12 +320,16 @@ class Ui_MainWindow(object):
         except Exception as e:
             print(f"Error in show_transaction_details: {e}")
 
-if __name__ == "__main__":
-        import sys
 
-        app = QtWidgets.QApplication(sys.argv)
-        MainWindow = QtWidgets.QMainWindow()
-        ui = Ui_MainWindow()
-        ui.setupUi(MainWindow)
-        MainWindow.show()
-        sys.exit(app.exec_())
+if __name__ == "__main__":
+    import sys
+
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+
+
+
