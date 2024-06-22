@@ -91,9 +91,9 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.pushButton_3.setText(_translate("Dialog", "Сохранить"))
 
     def table_gen(self):
-        goods_lst = db.get_goods()
-        headers_one = ['articul', 'name', 'price', 'ex_time', 'quant in warehouse']
-        headers_two = ['articul', 'name', 'price', 'ex_time', 'quantity']
+        goods_lst = db.get_goods_with_wh()
+        headers_one = ['articul', 'name', 'price', 'exp_date', 'warehouse', 'quant in warehouse']
+        headers_two = ['articul', 'name', 'price', 'exp_date', 'warehouse', 'quantity']
 
         self.tableWidget.setColumnCount(len(headers_one))
         self.tableWidget.setRowCount(len(goods_lst))
@@ -105,6 +105,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         for row, i in enumerate(goods_lst):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
+                self.make_cell_enable_to_edit(row, col)
 
     def set_combobox_items(self):
         combobox_items = db.get_clients()
@@ -112,21 +113,27 @@ class Ui_Dialog(QtWidgets.QDialog):
             self.comboBox.addItem(i)
 
     def double_clicked(self, row, column):
+        warehouse_list = db.get_wh_names()
         data_row = self.row_data_from_table1(row)
-        data_row[4] = '' # quantity
+        data_row[5] = '' # quantity
 
         data_lst = self.data_from_table2()
         for data in data_lst:
-            data[4] = ''
+            data[5] = ''
         if data_row not in data_lst: # если еще нет такой строки во второй таблице, то добавляем
             self.tableWidget_2.insertRow(0)
             for col, data in enumerate(data_row):
+                if col == 4:
+                    comboBox = QtWidgets.QComboBox()
+                    for i in warehouse_list:
+                        comboBox.addItem(i)
+                    self.tableWidget_2.setCellWidget(0, col, comboBox)
                 self.tableWidget_2.setItem(0, col, QtWidgets.QTableWidgetItem(str(data)))
 
     def cell_changed(self, row, column):
         # if column == 4:
         data_changed_row = self.row_data_from_table2(row)
-        if data_changed_row[4] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
+        if data_changed_row[5] != '': # если поменялось именно количество, то ниже меняем итоговую сумму:
             self.set_total_sum()
 
     def delete_btn(self):
@@ -136,29 +143,29 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.set_total_sum()
 
     def save_data(self):
-        if self.quantity_check():  # если введенное количество не больше того, что есть на складе
-            data_lst = self.data_from_table2()
-            person_id = self.person[0]
-            client = self.comboBox.currentText()
-            now = datetime.datetime.now()
-            transaction_id = db.insert_transact(['Принять', person_id, now, ''])
-            acceptance_id = db.insert_accept([transaction_id, person_id, client])
-            for data_row in data_lst:
-                db.increase_cnt([data_row[0], data_row[1], data_row[2], data_row[3], ''], data_row[4])
-                db.insert_accData([data_row[1], data_row[3], acceptance_id, data_row[4], data_row[3]])
+        # if self.quantity_check():  # если введенное количество не больше того, что есть на складе
+        data_lst = self.data_from_table2()
+        person_id = self.person[0]
+        client = self.comboBox.currentText()
+        now = datetime.datetime.now()
+        transaction_id = db.insert_transact(['Acceptance', person_id, now, ''])
+        acceptance_id = db.insert_accept([transaction_id, person_id, client])
+        for data_row in data_lst:
+            db.increase_cnt([data_row[0], data_row[1], data_row[2], data_row[3], ''], data_row[5], data_row[4], acceptance_id, data_row[3])
+            db.insert_accData([data_row[0], data_row[1], data_row[2], data_row[3]], [acceptance_id, data_row[5], data_row[3]])
 
-            self.log_data = 'Проведена операция "Принять". '
-            self.close()
-        else:
-            QMessageBox.warning(None, "Ошибка", "Вы указали количество больше, чем есть на складе!")
+        self.log_data = 'Проведена операция "Принять". '
+        self.close()
+        # else:
+        #     QMessageBox.warning(None, "Ошибка", "Вы указали количество больше, чем есть на складе!")
 
 
     def set_total_sum(self):
         data_lst = self.data_from_table2()
         sum = 0
         for data_row in data_lst:
-            if data_row[4] != '':
-                sum += round(float(data_row[2]) * int(data_row[4]), 2)
+            if data_row[5] != '':
+                sum += round(float(data_row[2]) * int(data_row[5]), 2)
         self.lineEdit.setText(str(sum))
 
     def row_data_from_table1(self, row):
@@ -182,22 +189,29 @@ class Ui_Dialog(QtWidgets.QDialog):
         for row in range(self.tableWidget_2.rowCount()):
             data = []
             for col in range(self.tableWidget_2.columnCount()):
-                it = self.tableWidget_2.item(row, col)
-                text = it.text() if it is not None else ""
+                if col == 4:
+                    text = self.tableWidget_2.cellWidget(row, col).currentText()
+                else:
+                    it = self.tableWidget_2.item(row, col)
+                    text = it.text() if it is not None else ""
                 data.append(text)
             lst.append(data)
         return lst
 
     def quantity_check(self):
         data_lst_tb2 = self.data_from_table2()
-        goods_lst = db.get_goods()
+        goods_lst = db.get_goods_with_wh()
 
         for data_row in data_lst_tb2:
             for good in goods_lst:
-                if data_row[1] == good[1]:
-                    if int(good[4]) < int(data_row[4]):
+                if data_row[0] == good[0] and data_row[1] == good[1] and data_row[2] == good[2] and data_row[3] == good[3] and data_row[4] == good[4]:
+                    if int(good[5]) < int(data_row[5]):
                         return False
         return True
+
+    def make_cell_enable_to_edit(self, row, col):
+        it = self.tableWidget.item(row, col)
+        it.setFlags(QtCore.Qt.ItemIsEnabled)
 
     def exec_(self):
         super().exec_()

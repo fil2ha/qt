@@ -92,8 +92,8 @@ class Ui_Dialog(QtWidgets.QDialog):
 
     def table_gen(self):
         goods_lst = db.get_goods_with_wh()
-        headers_one = ['articul', 'name', 'price', 'ex_time', 'warehouse', 'quant in warehouse']
-        headers_two = ['articul', 'name', 'price', 'ex_time', 'from warehouse 1','to warehouse 2', 'quantity']
+        headers_one = ['articul', 'name', 'price', 'exp_date', 'warehouse', 'quant in warehouse']
+        headers_two = ['articul', 'name', 'price', 'exp_date', 'from warehouse 1','to warehouse 2', 'quantity']
 
         self.tableWidget.setColumnCount(len(headers_one))
         self.tableWidget.setRowCount(len(goods_lst))
@@ -105,6 +105,8 @@ class Ui_Dialog(QtWidgets.QDialog):
         for row, i in enumerate(goods_lst):
             for col, j in enumerate(i):
                 self.tableWidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(j)))
+                it = self.tableWidget.item(row, col)
+                it.setFlags(QtCore.Qt.ItemIsEnabled)
 
     # def set_combobox_items(self):
     #     combobox_items = ['Микошевский Эдуард Викторович', 'Ловицкий Кирилл Антонович']
@@ -130,6 +132,9 @@ class Ui_Dialog(QtWidgets.QDialog):
                         comboBox.addItem(i)
                     self.tableWidget_2.setCellWidget(0, col, comboBox)
                 self.tableWidget_2.setItem(0, col, QtWidgets.QTableWidgetItem(str(data)))
+                if col not in (5, 6):
+                    it = self.tableWidget_2.item(0, col)
+                    it.setFlags(QtCore.Qt.ItemIsEnabled)
 
     # def cell_changed(self, row, column):
     #     if column == 4:
@@ -149,13 +154,11 @@ class Ui_Dialog(QtWidgets.QDialog):
             data_lst = self.data_from_table2()
             person_id = self.person[0]
             now = datetime.datetime.now()
-            transaction_id = db.insert_transact(['Переместить', person_id, now, ''])
+            transaction_id = db.insert_transact(['Transportation', person_id, now, ''])
             for data_row in data_lst:
                 transportation_id = db.insert_trans([transaction_id, data_row[4],data_row[5]])
-                db.transit(data_row[1], data_row[3], data_row[5], data_row[4], data_row[6])
-                db.insert_transData([data_row[1], data_row[3], transportation_id, data_row[6], data_row[3]])
-
-
+                db.transit([data_row[0], data_row[1], data_row[2], data_row[3]], data_row[5], data_row[4], data_row[6])
+                db.insert_transData([data_row[0], data_row[1], data_row[2], data_row[3]], [transportation_id, data_row[6], data_row[3]])
 
             self.log_data = 'Проведена операция "Переместить". '
             self.close()
@@ -208,7 +211,7 @@ class Ui_Dialog(QtWidgets.QDialog):
 
         for data_row in data_lst_tb2:
             for good in goods_lst:
-                if data_row[1] == good[1]:
+                if data_row[1] == good[1] and data_row[4] == good[4]:
                     if int(good[5]) < int(data_row[6]):
                         return False
         return True
