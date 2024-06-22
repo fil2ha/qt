@@ -50,23 +50,29 @@ class DataBase():
     # последний элемент кортежа имя склада
 
     # функции дял уменьшения и увеличения кол-ва на складе определённого товара
-    def decrease_cnt(self, name, ex_time, cnt):
+    def decrease_cnt(self, list_good, cnt, wh_name):
+        #[articul, name, price, ex_time]
         self.cursor.execute(f"""
                                 UPDATE GoodsWarehouse 
                                 SET count = count - ? 
                                 WHERE id IN (
                                 SELECT id FROM Goods 
                                 WHERE name = ? AND ex_time = ?
-                            )""", (cnt, name, ex_time))
+                            )""", )
         self.connection.commit()
 
     # доделать
-    def increase_cnt(self, list_good, cnt):
+    def increase_cnt(self, list_good, cnt, wh_name, acc_id, ex_date):
         #[articul, name, price, ex_time, img]
+
         self.cursor.execute("""
-                SELECT * FROM Goods WHERE name = ? AND ex_time = ?
-                """, (list_good[1], list_good[3]))
+                SELECT * FROM Goods WHERE name = ? AND ex_time = ? AND articul = ?
+                """, (list_good[1], list_good[3], list_good[0]))
         temp = self.cursor.fetchall()
+        self.cursor.execute(f"SELECT id FROM warehouse WHERE name = '{wh_name}'")
+        wh_id = self.cursor.fetchone()[0]
+        self.cursor.execute(f"SELECT expire_date FROM AcceptanceData WHERE acceptance_id = '{acc_id}'")
+        acc_date = self.cursor.fetchone()[0]
         if temp:
             self.cursor.execute("""
                 UPDATE GoodsWarehouse 
@@ -85,7 +91,7 @@ class DataBase():
             self.cursor.execute("""
                 INSERT INTO GoodsWarehouse (good_id, warehouse_id, count, expire_date, accept_date, accept_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (id, 1, cnt, 1, 1, 1))
+            """, (id, wh_id, cnt, ex_date, acc_date, acc_id))
             self.connection.commit()
 
     # функция для добавления транзакции и возвращегия id этой транзакции
@@ -127,11 +133,14 @@ class DataBase():
         self.connection.commit()
         return self.cursor.lastrowid
 
-    def insert_accData(self, list_ad):
-        self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (list_ad[0], list_ad[1]))
+    def insert_accData(self, list1, list2):
+        #list1 [articul, name, price, ex_time]
+        #list2 [acceptance_id, count, expire_date]
+        self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ? AND price = ? AND articul = ?",
+                            (list1[1], list1[3], list1[2],list1[0]))
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute("INSERT INTO AcceptanceData (good_id, acceptance_id, count, expire_date) VALUES (?, ?, ?, ?)",
-                            (temp_good_id, list_ad[2], list_ad[3], list_ad[4]))
+                            (temp_good_id, list2[0], list2[1], list2[2]))
         self.connection.commit()
 
     def insert_wo(self, list_wo):
@@ -231,7 +240,7 @@ class DataBase():
         elif rsh_type == 'A_':
             conditions = " OR ".join(f"{col} LIKE '{rsh_str}%'" for col in columns)
             self.cursor.execute(f"SELECT * FROM {table_name} WHERE {conditions}")
-                    
+
         result = self.cursor.fetchall()
 
         if not result:
@@ -261,6 +270,8 @@ class DataBase():
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
         return(temp)
+
+
 
 db = DataBase()
 
