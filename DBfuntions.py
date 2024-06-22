@@ -53,14 +53,17 @@ class DataBase():
         #[articul, name, price, ex_time]
         self.cursor.execute("BEGIN TRANSACTION;")
 
-        self.cursor.execute("""
-                    UPDATE GoodsWarehouse 
-                    SET count = count - ? 
-                    WHERE good_id IN (
-                        SELECT id FROM Goods 
-                        WHERE name = ? AND ex_time = ? AND articul = ? AND price = ?
-                    )
-                """, (cnt, list_good[1], list_good[3],  list_good[0], list_good[2]))
+        w_id = db.get_wh_id(wh_name)
+        sql = f"SELECT Goods.id FROM Goods  WHERE Goods.name = '{list_good[1]}' AND Goods.ex_time = '{list_good[3]}' AND articul = {list_good[0]} AND price = {list_good[2]} "
+
+        self.cursor.execute(sql)
+        good_id = self.cursor.fetchone()[0]
+        self.cursor.execute(f"""
+                                        UPDATE GoodsWarehouse 
+                                        SET count = count - {cnt} 
+                                        WHERE good_id = {good_id} AND warehouse_id = {w_id}
+
+                                    """)
 
         self.cursor.execute("""
                     DELETE FROM GoodsWarehouse 
@@ -71,21 +74,28 @@ class DataBase():
     # доделать
     def increase_cnt(self, list_good, cnt, wh_name, acc_id, ex_date):
         #[articul, name, price, ex_time, img]
+        wh_id = self.get_wh_id(wh_name)
+
         self.cursor.execute("""
                 SELECT * FROM Goods WHERE name = ? AND ex_time = ? AND articul = ? AND price = ?
                 """, (list_good[1], list_good[3], list_good[0], list_good[2]))
-        temp = self.cursor.fetchall()
-        self.cursor.execute(f"SELECT id FROM warehouse WHERE name = '{wh_name}'")
-        wh_id = self.cursor.fetchone()[0]
+        temp = self.cursor.fetchone()
         if temp:
-            self.cursor.execute("""
-                UPDATE GoodsWarehouse 
-                SET count = count + ? 
-                WHERE id IN (
-                    SELECT id FROM Goods 
-                    WHERE name = ? AND ex_time = ? AND articul = ? AND price = ?
-                )
-            """, (cnt, list_good[1], list_good[3], list_good[0], list_good[2]))
+            good_id = temp[0]
+            sql = f"SELECT * FROM GoodsWarehouse WHERE good_id = {good_id} AND warehouse_id = {wh_id}"
+            self.cursor.execute(sql)
+            temp2 = self.cursor.fetchall()
+            if temp2:
+                self.cursor.execute(f"""
+                    UPDATE GoodsWarehouse 
+                    SET count = count + ? 
+                    WHERE good_id = {good_id} AND warehouse_id = {wh_id}
+                """, (cnt))
+            else:
+                self.cursor.execute("""
+                                INSERT INTO GoodsWarehouse (good_id, warehouse_id, count, expire_date, accept_date, accept_id)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            """, (good_id, wh_id, cnt, ex_date, 1, acc_id))
             self.connection.commit()
         else:
             self.cursor.execute("""
