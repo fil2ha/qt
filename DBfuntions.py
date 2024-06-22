@@ -169,12 +169,13 @@ class DataBase():
         self.connection.commit()
         return self.cursor.lastrowid
 
-    def insert_transData(self, list_td):
-        self.cursor.execute("SELECT id FROM Goods WHERE name = ? AND ex_time = ?", (list_td[0], list_td[1]))
+    def insert_transData(self,  list_good, list_td):
+        self.cursor.execute("SELECT id FROM Goods WHERE articul = ? AND name = ? AND price = ? AND ex_time = ?",
+                            list_good)
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute(
             "INSERT INTO TransportationData (good_id, transportation_id, count, expire_date) VALUES (?, ?, ?, ?)",
-            (temp_good_id, list_td[2], list_td[3], list_td[4]))
+            (temp_good_id, list_td[0], list_td[1], list_td[2]))
         self.connection.commit()
 
     def get_clients(self):
@@ -185,15 +186,14 @@ class DataBase():
                 temp.append(__)
         return temp
 
-    def transit(self, name, ex_time, name_to, name_from, cnt):
-        # Получите идентификатор товара по имени и сроку годности
-        self.cursor.execute("SELECT * FROM Goods WHERE name = ? AND ex_time = ?", (name, ex_time))
+    def transit(self, list_good, name_to, name_from, cnt):
+        self.cursor.execute("SELECT id FROM Goods WHERE articul = ? AND name = ? AND price = ? AND ex_time = ?",
+                            list_good)
         good_id = self.cursor.fetchone()[0]
         w_i_to = db.get_wh_id(name_to)
         w_i_from = db.get_wh_id(name_from)
         self.cursor.execute(f"SELECT * FROM GoodsWarehouse WHERE good_id = {good_id} AND warehouse_id = {w_i_to}")
         tp = self.cursor.fetchone()
-
         if not tp:
             self.cursor.execute("""
                             UPDATE GoodsWarehouse 
@@ -201,7 +201,6 @@ class DataBase():
                             WHERE good_id = ?
                             AND warehouse_id = ? 
                         """, (cnt, good_id, w_i_from))
-            # Если записи нет, добавьте новую
             self.cursor.execute("""
                 INSERT INTO GoodsWarehouse (good_id, warehouse_id, count, expire_date, accept_date, accept_id)
                 VALUES (?, ?, ?, ?, ?, ?)
