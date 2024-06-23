@@ -290,8 +290,6 @@ class DataBase():
         print(d_to_show)
         return d_to_show
 
-
-
     def get_trans_info(self, type):
         self.cursor.execute(f'Pragma table_info ("{type}")')
         temp = []
@@ -301,9 +299,11 @@ class DataBase():
         self.cursor.execute(f'Pragma table_info ("{query}")')
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
+        print(temp)
         return(temp)
 
 
 db = DataBase()
 
 db.get_trans(1, 'Sell')
+db.get_trans_info('sell')
