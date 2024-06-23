@@ -141,7 +141,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.set_total_sum()
 
     def save_data(self):
-        if self.quantity_check():  # если введенное количество не больше того, что есть на складе
+        if self.quantity_check() == 1:  # если введенное количество не больше того, что есть на складе
             data_lst = self.data_from_table2()
             person_id = self.person[0]
             now = datetime.datetime.now()
@@ -153,8 +153,10 @@ class Ui_Dialog(QtWidgets.QDialog):
 
             self.log_data = 'Проведена операция "Списать". '
             self.close()
-        else:
+        elif self.quantity_check() == 2:
             QMessageBox.warning(None, "Ошибка", "Вы указали количество больше, чем есть на складе!")
+        elif self.quantity_check() == 3:
+            QMessageBox.warning(None, "Ошибка", "Вы не указали количество!")
 
     def set_total_sum(self):
         data_lst = self.data_from_table2()
@@ -194,13 +196,22 @@ class Ui_Dialog(QtWidgets.QDialog):
     def quantity_check(self):
         data_lst_tb2 = self.data_from_table2()
         goods_lst = db.get_goods_with_wh()
+        goods = []
+        for good in goods_lst:
+            good = list(good)
+            good[2] = str(good[2])
+            goods.append(good)
 
-        for data_row in data_lst_tb2:
-            for good in goods_lst:
-                if data_row[1] == good[1] and data_row[4] == good[4]:
-                    if int(good[5]) < int(data_row[5]):
-                        return False
-        return True
+        data_row = data_lst_tb2[0]
+        if data_row[5] == '': # если не введено кол-во
+            return 3
+
+        for good in goods:
+            if data_row[:5] == good[:5]:
+                if int(good[5]) < int(data_row[5]):
+                    return 2 # если количество больше, чем есть на складе
+
+        return 1
 
     def exec_(self):
         super().exec_()
