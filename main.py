@@ -12,13 +12,13 @@ from documents import generate_document  # Импортируем функцию
 class TransactionDialog(QtWidgets.QDialog):
     def __init__(self, transaction_data, headers, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Детали транзакции")
+        self.setWindowTitle("Transaction Details")
         self.setGeometry(300, 300, 400, 300)
 
         layout = QtWidgets.QVBoxLayout()
 
-        for header, data in zip(headers, transaction_data):
-            label = QtWidgets.QLabel(f"{header}: {data}")
+        for key, value in transaction_data.items():
+            label = QtWidgets.QLabel(f"{key}: {value}")
             layout.addWidget(label)
 
         self.setLayout(layout)
@@ -142,6 +142,8 @@ class Ui_MainWindow(object):
         self.pushButton_exit.clicked.connect(MainWindow.close)
         self.pushButton_documents.clicked.connect(self.open_documents)  # Подключаем новую функцию
 
+        self.set_access_level('admin')
+
         self.selected_row_data = []  # Инициализация атрибута для хранения данных выбранной строки
 
         self.db = DataBase()
@@ -163,6 +165,42 @@ class Ui_MainWindow(object):
         self.pushButton_personal.setText(_translate("MainWindow", "ПЕРСОНАЛ"))
         self.pushButton__product.setText(_translate("MainWindow", "ТОВАРЫ"))
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
+
+    def set_access_level(self, access_level):
+        self.pushButton_change.setEnabled(False)
+        self.pushButton_del.setEnabled(False)
+        self.pushButton_get.setEnabled(False)
+        self.pushButton_post.setEnabled(False)
+        self.pushButton_documents.setEnabled(False)
+        self.pushButton_rollback.setEnabled(False)
+        self.pushButton_clients.setEnabled(False)
+        self.pushButton_stores.setEnabled(False)
+        self.pushButton_personal.setEnabled(False)
+        self.pushButton__product.setEnabled(False)
+
+        if access_level == 'admin':
+            self.pushButton_change.setEnabled(True)
+            self.pushButton_del.setEnabled(True)
+            self.pushButton_get.setEnabled(True)
+            self.pushButton_post.setEnabled(True)
+            self.pushButton_documents.setEnabled(True)
+            self.pushButton_rollback.setEnabled(True)
+            self.pushButton_clients.setEnabled(True)
+            self.pushButton_stores.setEnabled(True)
+            self.pushButton_personal.setEnabled(True)
+            self.pushButton__product.setEnabled(False)
+
+        elif access_level == 'storekeeper':
+            self.pushButton_change.setEnabled(True)
+            self.pushButton_del.setEnabled(True)
+            self.pushButton_get.setEnabled(True)
+            self.pushButton_post.setEnabled(True)
+            self.pushButton_documents.setEnabled(True)
+            self.pushButton_rollback.setEnabled(True)
+            self.pushButton_rollback.setEnabled(False)
+
+        elif access_level == 'user':
+            pass
 
     def show_clients(self):
         self.window = QtWidgets.QMainWindow()
@@ -321,6 +359,7 @@ class Ui_MainWindow(object):
 
             self.dialog = TransactionDialog(transaction_data, headers)
             self.dialog.exec_()
+
         except Exception as e:
             print(f"Error in show_transaction_details: {e}")
 
@@ -333,6 +372,8 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
+
+    ui.set_access_level('storekeeper')
     sys.exit(app.exec_())
 
 
