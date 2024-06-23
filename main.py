@@ -9,7 +9,6 @@ from PyQt5.QtSql import QSqlTableModel
 from DBfuntions import db, DataBase
 from documents import generate_document  # Импортируем функцию из другого файла
 
-
 class TransactionDialog(QtWidgets.QDialog):
     def __init__(self, transaction_data, headers, parent=None):
         super().__init__(parent)
@@ -30,6 +29,11 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1121, 750)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setStyleSheet("""
+             QWidget{   
+                
+            }
+        """)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton_exit = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_exit.setGeometry(QtCore.QRect(890, 650, 171, 51))
