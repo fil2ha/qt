@@ -188,7 +188,7 @@ class Ui_MainWindow(object):
             self.pushButton_clients.setEnabled(True)
             self.pushButton_stores.setEnabled(True)
             self.pushButton_personal.setEnabled(True)
-            self.pushButton__product.setEnabled(False)
+            self.pushButton__product.setEnabled(True)
 
         elif access_level == 'storekeeper':
             self.pushButton_change.setEnabled(True)
