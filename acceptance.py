@@ -143,21 +143,21 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.set_total_sum()
 
     def save_data(self):
-        # if self.quantity_check():  # если введенное количество не больше того, что есть на складе
-        data_lst = self.data_from_table2()
-        person_id = self.person[0]
-        client = self.comboBox.currentText()
-        now = datetime.datetime.now()
-        transaction_id = db.insert_transact(['Acceptance', person_id, now, ''])
-        acceptance_id = db.insert_accept([transaction_id, person_id, client])
-        for data_row in data_lst:
-            db.increase_cnt([data_row[0], data_row[1], data_row[2], data_row[3], ''], data_row[5], data_row[4], acceptance_id, data_row[3])
-            db.insert_accData([data_row[0], data_row[1], data_row[2], data_row[3]], [acceptance_id, data_row[5], data_row[3]])
+        if self.is_empty_fields():  # если не введено какое-то поле
+            data_lst = self.data_from_table2()
+            person_id = self.person[0]
+            client = self.comboBox.currentText()
+            now = datetime.datetime.now()
+            transaction_id = db.insert_transact(['Acceptance', person_id, now, ''])
+            acceptance_id = db.insert_accept([transaction_id, person_id, client])
+            for data_row in data_lst:
+                db.increase_cnt([data_row[0], data_row[1], data_row[2], data_row[3], ''], data_row[5], data_row[4], acceptance_id, data_row[3])
+                db.insert_accData([data_row[0], data_row[1], data_row[2], data_row[3]], [acceptance_id, data_row[5], data_row[3]])
 
-        self.log_data = 'Проведена операция "Принять". '
-        self.close()
-        # else:
-        #     QMessageBox.warning(None, "Ошибка", "Вы указали количество больше, чем есть на складе!")
+            self.log_data = 'Проведена операция "Принять". '
+            self.close()
+        else:
+            QMessageBox.warning(None, "Ошибка", "Введены не все поля!")
 
 
     def set_total_sum(self):
@@ -198,15 +198,13 @@ class Ui_Dialog(QtWidgets.QDialog):
             lst.append(data)
         return lst
 
-    def quantity_check(self):
+    def is_empty_fields(self):
         data_lst_tb2 = self.data_from_table2()
-        goods_lst = db.get_goods_with_wh()
+        data_row = data_lst_tb2[0]
+        for i in data_row:
+            if i == '':
+                return False
 
-        for data_row in data_lst_tb2:
-            for good in goods_lst:
-                if data_row[0] == good[0] and data_row[1] == good[1] and data_row[2] == good[2] and data_row[3] == good[3] and data_row[4] == good[4]:
-                    if int(good[5]) < int(data_row[5]):
-                        return False
         return True
 
     def make_cell_enable_to_edit(self, row, col):
