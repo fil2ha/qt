@@ -356,7 +356,7 @@ class Ui_MainWindow(object):
 
             transaction_data = self.db.get_trans(transaction_id, transaction_type)
             headers = self.db.get_trans_info(transaction_type)
-
+            print(headers)
             self.dialog = TransactionDialog(transaction_data, headers)
             self.dialog.exec_()
 
@@ -373,7 +373,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
 
-    ui.set_access_level('storekeeper')
+    ui.set_access_level('admin')
     sys.exit(app.exec_())
 
 
