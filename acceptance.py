@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from DBfuntions import db
 from PyQt5.QtWidgets import QMessageBox
 import datetime
+import re
 
 
 class Ui_Dialog(QtWidgets.QDialog):
@@ -166,7 +167,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         data_lst = self.data_from_table2()
         sum = 0
         for data_row in data_lst:
-            if data_row[5] != '' and data_row[5].isdigit() and data_row[2].isdigit():
+            if data_row[5] != '' and data_row[5].isdigit() and re.match(r'^[-+]?\d+(\.\d+)?$', data_row[2]) :
                 sum += round(float(data_row[2]) * int(data_row[5]), 2)
         self.lineEdit.setText(str(sum))
 
@@ -210,7 +211,7 @@ class Ui_Dialog(QtWidgets.QDialog):
 
         if not data_row[5].isdigit():
             return 3
-        if not data_row[2].isdigit():
+        if not re.match(r'^[-+]?\d+(\.\d+)?$', data_row[2]):
             return 3
 
         return 1
