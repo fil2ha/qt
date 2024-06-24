@@ -265,7 +265,6 @@ class DataBase():
             return result
 
         # ДЛЯ МИРОСЛАВА
-
     def get_trans(self, id_trans, type):
         self.cursor.execute(f"PRAGMA table_info('{type+'Data'}')")
         column_names = [col[1] for col in self.cursor.fetchall()]
@@ -278,7 +277,6 @@ class DataBase():
                                 WHERE transaction_id ={id_trans}
                             )""" )
         data = list(self.cursor.fetchone())
-        print(data)
         self.cursor.execute(f"SELECT name FROM Goods Where id = {data[1]}")
         temp_good = self.cursor.fetchone()[0]
         self.cursor.execute(f"SELECT * FROM {type} WHERE transaction_id ={id_trans}")
@@ -305,11 +303,44 @@ class DataBase():
                 temp.append(_[1])
         return(temp)
 
-    def rollback_transaction(self, type, trans_id):
-            #удалить из транзакции
-            #удалить из соответствующего типа и ДАТЫ
-            #вернуть на количество на склад
-        pass
+    def rollback_transaction(self, type, trans_id, type_id, wh_name):
+        self.cursor.execute(f"SELECT * FROM Transactions WHERE id = {trans_id}")
+        trans = self.cursor.fetchone()
+        self.cursor.execute(f"SELECT {type.lower()+'_id'}, good_id, count FROM {type+'Data'} WHERE id = {type_id}")
+        id_data = self.cursor.fetchone()
+        self.cursor.execute(f"Select * FROM {type} WHERE id = {id_data[0]}")
+        data = self.cursor.fetchone()
+        self.cursor.execute(f'DELETE FROM {type} WHERE id = {data[0]}')
+        self.cursor.execute(f'DELETE FROM {type+"Data"} WHERE id = {data[0]}')
+        self.cursor.execute(f'DELETE FROM Transactions WHERE id = {trans_id}')
+        self.cursor.execute(f"UPDATE GoodsWarehouse SET count = count + {id_data[2]} "
+                            f"WHERE good_id = {id_data[1]} AND warehouse_id IN ("
+                            f"SELECT id FROM Warehouse WHERE name = '{wh_name}')")
+        self.connection.commit()
+
+    def rollback_transaction(self, type, trans_id, type_id):
+        if type == "Transportation":
+            self.cursor.execute(f"SELECT * FROM Transactions WHERE id = {trans_id}")
+            trans = self.cursor.fetchone()
+            print(trans)
+            self.cursor.execute(f"SELECT {type.lower()+'_id'}, good_id, count FROM {type+'Data'} WHERE id = {type_id}")
+            id_data = self.cursor.fetchone()
+            print(id_data)
+            self.cursor.execute(f"SELECT * FROM {type} WHERE id = {id_data[0]}")
+            data = self.cursor.fetchone()[2:]
+            print(data)
+            self.cursor.execute(f'DELETE FROM {type} WHERE id = {data[0]}')
+            self.cursor.execute(f'DELETE FROM {type + "Data"} WHERE id = {data[0]}')
+            self.cursor.execute(f'DELETE FROM Transactions WHERE id = {trans_id}')
+            self.cursor.execute(f"UPDATE GoodsWarehouse SET count = count + {id_data[2]} "
+                                f"WHERE good_id = {id_data[1]} AND warehouse_id IN ("
+                                f"SELECT id FROM Warehouse WHERE name = '{data[0]}')")
+            self.cursor.execute(f"UPDATE GoodsWarehouse SET count = count - {id_data[2]} "
+                                f"WHERE good_id = {id_data[1]} AND warehouse_id IN ("
+                                f"SELECT id FROM Warehouse WHERE name = '{data[1]}')")
+            self.connection.commit()
+        else:
+            pass
 
     def get_client_for_id(self, id):
         self.cursor.execute(f"SELECT FIO FROM Client WHERE id = {id}")
@@ -317,4 +348,3 @@ class DataBase():
 
 
 db = DataBase()
-
