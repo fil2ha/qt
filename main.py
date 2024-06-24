@@ -174,7 +174,7 @@ class Ui_MainWindow(object):
         self.pushButton__product.setText(_translate("MainWindow", "ТОВАРЫ"))
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
 
-    def update_table_data(self): #aaaaff
+    def update_table_data(self): #aaaaf
         self.database1()
 
     def set_access_level(self, access_level):
