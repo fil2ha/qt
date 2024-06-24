@@ -169,7 +169,7 @@ class DataBase():
         self.cursor.execute("SELECT id FROM Goods WHERE articul = ? AND name = ? AND price = ? AND ex_time = ?", list_good)
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute(
-            "INSERT INTO WriteOffData (good_id,  write_of_id, count, expire_date) VALUES (?, ?, ?, ?)",
+            "INSERT INTO WriteOffData (good_id,  writeoff_id, count, expire_date) VALUES (?, ?, ?, ?)",
             (temp_good_id, list_wod[0], list_wod[1], list_wod[2]))
         self.connection.commit()
 
@@ -273,30 +273,24 @@ class DataBase():
         for col in self.cursor.fetchall():
             column_names.append(col[1])
         column_names[1] = 'good_name'
-        column_names.pop(0)
-        column_names.pop(1)
-        column_names.pop(3)
-        column_names.pop(3)
         self.cursor.execute(f"""SELECT * FROM {type+'Data'} WHERE {type.lower()+'_id'} IN (
                                 SELECT id FROM {type} 
                                 WHERE transaction_id ={id_trans}
                             )""" )
         data = list(self.cursor.fetchone())
+        print(data)
+        self.cursor.execute(f"SELECT name FROM Goods Where id = {data[1]}")
+        temp_good = self.cursor.fetchone()[0]
         self.cursor.execute(f"SELECT * FROM {type} WHERE transaction_id ={id_trans}")
         t = self.cursor.fetchone()
         for i in t:
             data.append(i)
-        self.cursor.execute(f"SELECT name FROM Goods Where id = {t[1]}")
-        temp_good = self.cursor.fetchone()[0]
+
         data[1] = temp_good
-        data.pop(0)
-        data.pop(1)
-        data.pop(3)
-        data.pop(3)
         d_to_show = {}
+
         for i in range(len(column_names)):
             d_to_show[column_names[i]] = data[i]
-
         print(d_to_show)
         return d_to_show
 
@@ -309,11 +303,18 @@ class DataBase():
         self.cursor.execute(f'Pragma table_info ("{query}")')
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
-        print(temp)
         return(temp)
+
+    def rollback_transaction(self, type, trans_id):
+            #удалить из транзакции
+            #удалить из соответствующего типа и ДАТЫ
+            #вернуть на количество на склад
+        pass
+
+    def get_client_for_id(self, id):
+        self.cursor.execute(f"SELECT FIO FROM Client WHERE id = {id}")
+        return self.cursor.fetchone()
 
 
 db = DataBase()
 
-db.get_trans(1, 'Sell')
-db.get_trans_info('sell')

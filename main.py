@@ -367,7 +367,7 @@ class Ui_MainWindow(object):
 
             transaction_data = self.db.get_trans(transaction_id, transaction_type)
             headers = self.db.get_trans_info(transaction_type)
-
+            print(headers)
             self.dialog = TransactionDialog(transaction_data, headers)
             self.dialog.exec_()
 
