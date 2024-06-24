@@ -117,12 +117,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.widget1)
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.lineEdit = QtWidgets.QLineEdit(self.widget1)
-        self.lineEdit.setObjectName("lineEdit")
-        self.horizontalLayout_4.addWidget(self.lineEdit)
+        self.searchlineEdit = QtWidgets.QLineEdit(self.widget1)
+        self.searchlineEdit.setObjectName("lineEdit")
+        self.horizontalLayout_4.addWidget(self.searchlineEdit)
+        self.searchlineEdit.textChanged.connect(self.search_and_highlight)
         self.pushButton_search = QtWidgets.QPushButton(self.widget1)
         self.pushButton_search.setObjectName("pushButton_search")
         self.horizontalLayout_4.addWidget(self.pushButton_search)
+
 
         # обновляем табличку
         self.pushButton_refresh = QtWidgets.QPushButton(self.centralwidget)
@@ -258,6 +260,17 @@ class Ui_MainWindow(object):
         line_text += data
         self.lineEdit_2.setText(line_text)
 
+    def search_and_highlight(self):
+        search_text = self.searchlineEdit.text().lower()
+        for row in range(self.tableWidget.rowCount()):
+            should_show_row = False
+
+            for col in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, col)
+                if item and search_text in item.text().lower():
+                    should_show_row = True
+                    break
+            self.tableWidget.setRowHidden(row, not should_show_row)
     def show_post(self):
         self.ui = sell.Ui_Dialog()
         data = self.ui.exec_()
