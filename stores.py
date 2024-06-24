@@ -16,6 +16,10 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
 
+        # Layout for filters
+        self.filterLayout = QtWidgets.QHBoxLayout()
+        self.verticalLayout.addLayout(self.filterLayout)
+
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(5, 130, 800, 421))
         self.tableWidget.setObjectName("tableWidget")
@@ -96,6 +100,29 @@ class Ui_MainWindow(object):
                 for j in range(len(table_data[i])):
                     self.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(table_data[i][j])))
         con.commit()
+        self.add_filters()
+
+    def add_filters(self):
+        header = self.tableWidget.horizontalHeader()
+        self.filter_widgets = []
+        for column in range(self.tableWidget.columnCount()):
+            line_edit = QtWidgets.QLineEdit()
+            line_edit.setPlaceholderText(f"Фильтр {self.tableWidget.horizontalHeaderItem(column).text()}")
+            line_edit.textChanged.connect(self.apply_filter)
+            self.filter_widgets.append(line_edit)
+            self.filterLayout.addWidget(line_edit)
+            header.setSectionResizeMode(column, QtWidgets.QHeaderView.Stretch)
+
+    def apply_filter(self):
+        filters = [widget.text().lower() for widget in self.filter_widgets]
+        for row in range(self.tableWidget.rowCount()):
+            self.tableWidget.setRowHidden(row, False)
+            for column in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, column)
+                if item:
+                    if filters[column] and filters[column] not in item.text().lower():
+                        self.tableWidget.setRowHidden(row, True)
+                        break
 
     def add_info_in(self, name, coordinates_a, coordinates_b, adress):
         max_id = 0

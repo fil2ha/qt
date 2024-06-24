@@ -81,8 +81,8 @@ def generate_document(operation, row_data):
     # а это можно чекануться
     context = {
         'name_operation': row_data[1],  # Переменная уже не понятно для чего
-        'date_operation': row_data[2],  # Переменная уже не понятно для чего
-        'summa_operation': row_data[3]  # Переменная уже не понятно для чего
+        'who_operation': row_data[2],  # Переменная уже не понятно для чего
+        'date_operation': row_data[3]  # Переменная уже не понятно для чего
     }
 
     # Словарь, который сопоставляет операции с соответствующими шаблонными файлами DOCX
@@ -95,10 +95,10 @@ def generate_document(operation, row_data):
 
     # Словарь, который сопоставляет операции с соответствующими шаблонными файлами DOCX
     template_files = {
-        "x": "sale_tpl.docx",  # Шаблон для операции - это ё...ь какая-то
-        "y": "moving_tpl.docx",
-        "z": "offs_tpl.docx",
-        "p": "acceptance_tpl.docx"
+        "Sell": "sale_tpl.docx",  # Шаблон для операции - это ё...ь какая-то. Уже лучше, но...
+        "Transportation": "moving_tpl.docx",
+        "WriteOff": "offs_tpl.docx",
+        "Acceptance": "acceptance_tpl.docx"
     }
 
     # Словарь, который сопоставляет операции с соответствующими выходными файлами DOCX
@@ -111,10 +111,10 @@ def generate_document(operation, row_data):
 
     # Словарь, который сопоставляет операции с соответствующими выходными файлами DOCX
     output_files = {
-        "x": "generated_sale_docx.docx",  # Выходной файл для операции
-        "y": "generated_moving_docx.docx",
-        "z": "generated_offs_docx.docx",
-        "p": "generated_acceptance_docx.docx"
+        "Sell": "generated_sale_docx.docx",  # Выходной файл для операции
+        "Transportation": "generated_moving_docx.docx",
+        "WriteOff": "generated_offs_docx.docx",
+        "Acceptance": "generated_acceptance_docx.docx"
     }
 
     # Проверяем, существует ли переданная операция в словаре шаблонных файлов
@@ -140,5 +140,3 @@ def generate_document(operation, row_data):
         raise ValueError(f"Unsupported operation: {operation}")
 
 
-# Пример использования:
-# generate_document("Продажа")

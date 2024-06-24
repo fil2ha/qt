@@ -135,7 +135,7 @@ class Ui_MainWindow(object):
                 self.items_to_delete.append(item_id)
             self.tableWidget.removeRow(current_row)
 
-    def add_info_in(self, name, unp, address, count, bik, bank, bank_address, ceo, email, phone, num_doc, more):
+    def add_info_in(self, Fio, telephone, type, column_6):
         max_id = 0
         row_count = self.tableWidget.rowCount()
 
@@ -154,35 +154,35 @@ class Ui_MainWindow(object):
         self.tableWidget.insertRow(row_count)
 
         id_item = QtWidgets.QTableWidgetItem(str(new_id))
-        name_item = QtWidgets.QTableWidgetItem(name)
-        unp_item = QtWidgets.QTableWidgetItem(unp)
-        address_item = QtWidgets.QTableWidgetItem(address)
-        count_item = QtWidgets.QTableWidgetItem(count)
-        bik_item = QtWidgets.QTableWidgetItem(bik)
-        bank_item = QtWidgets.QTableWidgetItem(bank)
-        bank_address_item = QtWidgets.QTableWidgetItem(bank_address)
-        ceo_item = QtWidgets.QTableWidgetItem(ceo)
-        email_item = QtWidgets.QTableWidgetItem(email)
-        phone_item = QtWidgets.QTableWidgetItem(phone)
-        num_doc_item = QtWidgets.QTableWidgetItem(num_doc)
-        more_item = QtWidgets.QTableWidgetItem(more)
+        Fio_item = QtWidgets.QTableWidgetItem(Fio)
+        telephone_item = QtWidgets.QTableWidgetItem(telephone)
+        type_item = QtWidgets.QTableWidgetItem(type)
+        column_6_item = QtWidgets.QTableWidgetItem(column_6)
+        # bik_item = QtWidgets.QTableWidgetItem(bik)
+        # bank_item = QtWidgets.QTableWidgetItem(bank)
+        # bank_address_item = QtWidgets.QTableWidgetItem(bank_address)
+        # ceo_item = QtWidgets.QTableWidgetItem(ceo)
+        # email_item = QtWidgets.QTableWidgetItem(email)
+        # phone_item = QtWidgets.QTableWidgetItem(phone)
+        # num_doc_item = QtWidgets.QTableWidgetItem(num_doc)
+        # more_item = QtWidgets.QTableWidgetItem(more)
 
         self.tableWidget.setItem(row_count, 0, id_item)
-        self.tableWidget.setItem(row_count, 1, name_item)
-        self.tableWidget.setItem(row_count, 2, unp_item)
-        self.tableWidget.setItem(row_count, 3, address_item)
-        self.tableWidget.setItem(row_count, 4, count_item)
-        self.tableWidget.setItem(row_count, 5, bik_item)
-        self.tableWidget.setItem(row_count, 6, bank_item)
-        self.tableWidget.setItem(row_count, 7, bank_address_item)
-        self.tableWidget.setItem(row_count, 8, ceo_item)
-        self.tableWidget.setItem(row_count, 9, email_item)
-        self.tableWidget.setItem(row_count, 10, phone_item)
-        self.tableWidget.setItem(row_count, 11, num_doc_item)
-        self.tableWidget.setItem(row_count, 12, more_item)
+        self.tableWidget.setItem(row_count, 1, Fio_item)
+        self.tableWidget.setItem(row_count, 2, telephone_item)
+        self.tableWidget.setItem(row_count, 3, type_item)
+        self.tableWidget.setItem(row_count, 4, column_6_item)
+        # self.tableWidget.setItem(row_count, 5, bik_item)
+        # self.tableWidget.setItem(row_count, 6, bank_item)
+        # self.tableWidget.setItem(row_count, 7, bank_address_item)
+        # self.tableWidget.setItem(row_count, 8, ceo_item)
+        # self.tableWidget.setItem(row_count, 9, email_item)
+        # self.tableWidget.setItem(row_count, 10, phone_item)
+        # self.tableWidget.setItem(row_count, 11, num_doc_item)
+        # self.tableWidget.setItem(row_count, 12, more_item)
 
         self.items_to_add.append(
-            (new_id, name, unp, address, count, bik, bank, bank_address, ceo, email, phone, num_doc, more))
+            (new_id, Fio, telephone, type, column_6))
 
     def save_changes(self):
         con = sqlite3.connect('srm.db', check_same_thread=False)
@@ -194,7 +194,7 @@ class Ui_MainWindow(object):
                     cur.execute(f"DELETE FROM {table_name} WHERE id = ?", (item_id,))
                 for item in self.items_to_add:
                     cur.executemany(
-                        '''INSERT INTO Client (id, name, ind_number, ceo, phone, email, address, current_account, bank, bik, bank_address, info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                        '''INSERT INTO Client (id, Fio, telephone, type, column_6) VALUES (?, ?, ?, ?, ?)''',
                         (item,))
                 con.commit()
         except sqlite3.Error as e:
@@ -206,8 +206,10 @@ class Ui_MainWindow(object):
         self.main_window.close()
         con.commit()
 
+
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

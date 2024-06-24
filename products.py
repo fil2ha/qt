@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(5, 130, 800, 421))
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(5)
+        self.tableWidget.setColumnCount(7)
         self.tableWidget.setHorizontalHeaderLabels([])
         # self.tableWidget.setHorizontalHeaderLabels(["ID", "Название", "Количество", "Цена", "Изображение", "Описание", "Склад"])
         self.verticalLayout.addWidget(self.tableWidget)
@@ -192,6 +192,7 @@ class Ui_MainWindow(object):
         self.items_to_delete.clear()
 
         self.main_window.close()
+        con.commit()
 
 
 if __name__ == "__main__":
