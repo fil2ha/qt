@@ -3,7 +3,7 @@ import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import clients2, products, stores, personal, sell, acceptance, writeoff, transportation
-import sqlite3  # Не забудьте импортировать sqlite3
+import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from PyQt5.QtSql import QSqlTableModel
 from DBfuntions import db, DataBase
@@ -123,6 +123,13 @@ class Ui_MainWindow(object):
         self.pushButton_search = QtWidgets.QPushButton(self.widget1)
         self.pushButton_search.setObjectName("pushButton_search")
         self.horizontalLayout_4.addWidget(self.pushButton_search)
+
+        # обновляем табличку
+        self.pushButton_refresh = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_refresh.setGeometry(QtCore.QRect(540, 115, 150, 30))
+        self.pushButton_refresh.setObjectName("pushButton_refresh")
+        self.pushButton_refresh.setText("Обновить таблицу")
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -141,6 +148,7 @@ class Ui_MainWindow(object):
         self.pushButton_post.clicked.connect(self.show_post)
         self.pushButton_exit.clicked.connect(MainWindow.close)
         self.pushButton_documents.clicked.connect(self.open_documents)  # Подключаем новую функцию
+        self.pushButton_refresh.clicked.connect(self.update_table_data)
 
         self.set_access_level('admin')
 
@@ -166,6 +174,9 @@ class Ui_MainWindow(object):
         self.pushButton__product.setText(_translate("MainWindow", "ТОВАРЫ"))
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
 
+    def update_table_data(self): #aaaaf
+        self.database1()
+
     def set_access_level(self, access_level):
         self.pushButton_change.setEnabled(False)
         self.pushButton_del.setEnabled(False)
@@ -188,7 +199,7 @@ class Ui_MainWindow(object):
             self.pushButton_clients.setEnabled(True)
             self.pushButton_stores.setEnabled(True)
             self.pushButton_personal.setEnabled(True)
-            self.pushButton__product.setEnabled(False)
+            self.pushButton__product.setEnabled(True)
 
         elif access_level == 'storekeeper':
             self.pushButton_change.setEnabled(True)
@@ -356,7 +367,7 @@ class Ui_MainWindow(object):
 
             transaction_data = self.db.get_trans(transaction_id, transaction_type)
             headers = self.db.get_trans_info(transaction_type)
-
+            print(headers)
             self.dialog = TransactionDialog(transaction_data, headers)
             self.dialog.exec_()
 
@@ -373,7 +384,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
 
-    ui.set_access_level('storekeeper')
+    ui.set_access_level('admin')
     sys.exit(app.exec_())
 
 
