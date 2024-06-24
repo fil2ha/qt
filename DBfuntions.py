@@ -169,7 +169,7 @@ class DataBase():
         self.cursor.execute("SELECT id FROM Goods WHERE articul = ? AND name = ? AND price = ? AND ex_time = ?", list_good)
         temp_good_id = self.cursor.fetchone()[0]
         self.cursor.execute(
-            "INSERT INTO WriteOffData (good_id,  write_of_id, count, expire_date) VALUES (?, ?, ?, ?)",
+            "INSERT INTO WriteOffData (good_id,  writeoff_id, count, expire_date) VALUES (?, ?, ?, ?)",
             (temp_good_id, list_wod[0], list_wod[1], list_wod[2]))
         self.connection.commit()
 
@@ -265,7 +265,6 @@ class DataBase():
             return result
 
         # ДЛЯ МИРОСЛАВА
-
     def get_trans(self, id_trans, type):
         self.cursor.execute(f"PRAGMA table_info('{type+'Data'}')")
         column_names = [col[1] for col in self.cursor.fetchall()]
@@ -273,30 +272,23 @@ class DataBase():
         for col in self.cursor.fetchall():
             column_names.append(col[1])
         column_names[1] = 'good_name'
-        column_names.pop(0)
-        column_names.pop(1)
-        column_names.pop(3)
-        column_names.pop(3)
         self.cursor.execute(f"""SELECT * FROM {type+'Data'} WHERE {type.lower()+'_id'} IN (
                                 SELECT id FROM {type} 
                                 WHERE transaction_id ={id_trans}
                             )""" )
         data = list(self.cursor.fetchone())
+        self.cursor.execute(f"SELECT name FROM Goods Where id = {data[1]}")
+        temp_good = self.cursor.fetchone()[0]
         self.cursor.execute(f"SELECT * FROM {type} WHERE transaction_id ={id_trans}")
         t = self.cursor.fetchone()
         for i in t:
             data.append(i)
-        self.cursor.execute(f"SELECT name FROM Goods Where id = {t[1]}")
-        temp_good = self.cursor.fetchone()[0]
+
         data[1] = temp_good
-        data.pop(0)
-        data.pop(1)
-        data.pop(3)
-        data.pop(3)
         d_to_show = {}
+
         for i in range(len(column_names)):
             d_to_show[column_names[i]] = data[i]
-
         print(d_to_show)
         return d_to_show
 
@@ -309,11 +301,50 @@ class DataBase():
         self.cursor.execute(f'Pragma table_info ("{query}")')
         for _ in self.cursor.fetchall():
                 temp.append(_[1])
-        print(temp)
         return(temp)
+
+    def rollback_transaction(self, type, trans_id, type_id, wh_name):
+        self.cursor.execute(f"SELECT * FROM Transactions WHERE id = {trans_id}")
+        trans = self.cursor.fetchone()
+        self.cursor.execute(f"SELECT {type.lower()+'_id'}, good_id, count FROM {type+'Data'} WHERE id = {type_id}")
+        id_data = self.cursor.fetchone()
+        self.cursor.execute(f"Select * FROM {type} WHERE id = {id_data[0]}")
+        data = self.cursor.fetchone()
+        self.cursor.execute(f'DELETE FROM {type} WHERE id = {data[0]}')
+        self.cursor.execute(f'DELETE FROM {type+"Data"} WHERE id = {data[0]}')
+        self.cursor.execute(f'DELETE FROM Transactions WHERE id = {trans_id}')
+        self.cursor.execute(f"UPDATE GoodsWarehouse SET count = count + {id_data[2]} "
+                            f"WHERE good_id = {id_data[1]} AND warehouse_id IN ("
+                            f"SELECT id FROM Warehouse WHERE name = '{wh_name}')")
+        self.connection.commit()
+
+    def rollback_transaction(self, type, trans_id, type_id):
+        if type == "Transportation":
+            self.cursor.execute(f"SELECT * FROM Transactions WHERE id = {trans_id}")
+            trans = self.cursor.fetchone()
+            print(trans)
+            self.cursor.execute(f"SELECT {type.lower()+'_id'}, good_id, count FROM {type+'Data'} WHERE id = {type_id}")
+            id_data = self.cursor.fetchone()
+            print(id_data)
+            self.cursor.execute(f"SELECT * FROM {type} WHERE id = {id_data[0]}")
+            data = self.cursor.fetchone()[2:]
+            print(data)
+            self.cursor.execute(f'DELETE FROM {type} WHERE id = {data[0]}')
+            self.cursor.execute(f'DELETE FROM {type + "Data"} WHERE id = {data[0]}')
+            self.cursor.execute(f'DELETE FROM Transactions WHERE id = {trans_id}')
+            self.cursor.execute(f"UPDATE GoodsWarehouse SET count = count + {id_data[2]} "
+                                f"WHERE good_id = {id_data[1]} AND warehouse_id IN ("
+                                f"SELECT id FROM Warehouse WHERE name = '{data[0]}')")
+            self.cursor.execute(f"UPDATE GoodsWarehouse SET count = count - {id_data[2]} "
+                                f"WHERE good_id = {id_data[1]} AND warehouse_id IN ("
+                                f"SELECT id FROM Warehouse WHERE name = '{data[1]}')")
+            self.connection.commit()
+        else:
+            pass
+
+    def get_client_for_id(self, id):
+        self.cursor.execute(f"SELECT FIO FROM Client WHERE id = {id}")
+        return self.cursor.fetchone()
 
 
 db = DataBase()
-
-db.get_trans(1, 'Sell')
-db.get_trans_info('sell')

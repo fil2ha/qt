@@ -162,7 +162,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         data_lst = self.data_from_table2()
         sum = 0
         for data_row in data_lst:
-            if data_row[5] != '':
+            if data_row[5] != '' and data_row[5].isdigit():
                 sum += round(float(data_row[2]) * int(data_row[5]), 2)
         self.lineEdit.setText(str(sum))
 
@@ -204,6 +204,8 @@ class Ui_Dialog(QtWidgets.QDialog):
 
         data_row = data_lst_tb2[0]
         if data_row[5] == '': # если не введено кол-во
+            return 3
+        if not data_row[5].isdigit():
             return 3
 
         for good in goods:

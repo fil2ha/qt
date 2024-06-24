@@ -209,6 +209,8 @@ class Ui_Dialog(QtWidgets.QDialog):
         data_row = data_lst_tb2[0]
         if data_row[6] == '':  # если не введено кол-во
             return 3
+        if not data_row[6].isdigit():
+            return 3
 
         for good in goods:
             if data_row[:5] == good[:5]:

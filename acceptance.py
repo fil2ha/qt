@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from DBfuntions import db
 from PyQt5.QtWidgets import QMessageBox
 import datetime
+import re
 
 
 class Ui_Dialog(QtWidgets.QDialog):
@@ -143,7 +144,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.set_total_sum()
 
     def save_data(self):
-        if self.is_empty_fields():  # если не введено какое-то поле
+        if self.is_empty_fields() == 1:  # если не введено какое-то поле
             data_lst = self.data_from_table2()
             person_id = self.person[0]
             client = self.comboBox.currentText()
@@ -156,15 +157,17 @@ class Ui_Dialog(QtWidgets.QDialog):
 
             self.log_data = 'Проведена операция "Принять". '
             self.close()
-        else:
+        elif self.is_empty_fields() == 2:
             QMessageBox.warning(None, "Ошибка", "Введены не все поля!")
+        elif self.is_empty_fields() == 3:
+            QMessageBox.warning(None, "Ошибка", "Числовые поля введены некорректно!")
 
 
     def set_total_sum(self):
         data_lst = self.data_from_table2()
         sum = 0
         for data_row in data_lst:
-            if data_row[5] != '':
+            if data_row[5] != '' and data_row[5].isdigit() and re.match(r'^[-+]?\d+(\.\d+)?$', data_row[2]) :
                 sum += round(float(data_row[2]) * int(data_row[5]), 2)
         self.lineEdit.setText(str(sum))
 
@@ -201,11 +204,17 @@ class Ui_Dialog(QtWidgets.QDialog):
     def is_empty_fields(self):
         data_lst_tb2 = self.data_from_table2()
         data_row = data_lst_tb2[0]
+
         for i in data_row:
             if i == '':
-                return False
+                return 2
 
-        return True
+        if not data_row[5].isdigit():
+            return 3
+        if not re.match(r'^[-+]?\d+(\.\d+)?$', data_row[2]):
+            return 3
+
+        return 1
 
     def make_cell_enable_to_edit(self, row, col):
         it = self.tableWidget.item(row, col)
