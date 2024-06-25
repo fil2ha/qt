@@ -9,6 +9,7 @@ from PyQt5.QtSql import QSqlTableModel
 from DBfuntions import db, DataBase
 from documents import generate_document  # Импортируем функцию из другого файла
 
+
 class TransactionDialog(QtWidgets.QDialog):
     def __init__(self, transaction_data, headers, parent=None):
         super().__init__(parent)
@@ -117,14 +118,16 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.widget1)
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.searchlineEdit = QtWidgets.QLineEdit(self.widget1)
-        self.searchlineEdit.setObjectName("lineEdit")
-        self.horizontalLayout_4.addWidget(self.searchlineEdit)
-        self.searchlineEdit.textChanged.connect(self.search_and_highlight)
+        # self.searchlineEdit = QtWidgets.QLineEdit(self.widget1)
+        # self.searchlineEdit.setObjectName("lineEdit")
+        # self.horizontalLayout_4.addWidget(self.searchlineEdit)
+        # self.searchlineEdit.textChanged.connect(self.search_and_highlight)
+        self.lineEdit = QtWidgets.QLineEdit(self.widget1)
+        self.lineEdit.setObjectName("lineEdit")
+        self.horizontalLayout_4.addWidget(self.lineEdit)
         self.pushButton_search = QtWidgets.QPushButton(self.widget1)
         self.pushButton_search.setObjectName("pushButton_search")
         self.horizontalLayout_4.addWidget(self.pushButton_search)
-
 
         # обновляем табличку
         self.pushButton_refresh = QtWidgets.QPushButton(self.centralwidget)
@@ -150,6 +153,7 @@ class Ui_MainWindow(object):
         self.pushButton_post.clicked.connect(self.show_post)
         self.pushButton_exit.clicked.connect(MainWindow.close)
         self.pushButton_documents.clicked.connect(self.open_documents)  # Подключаем новую функцию
+        self.lineEdit.textChanged.connect(self.apply_filter_and_highlight)  # Подключаем обработчик для строки поиска
         self.pushButton_refresh.clicked.connect(self.update_table_data)
 
         self.set_access_level('admin')
@@ -176,7 +180,7 @@ class Ui_MainWindow(object):
         self.pushButton__product.setText(_translate("MainWindow", "ТОВАРЫ"))
         self.pushButton_search.setText(_translate("MainWindow", "Поиск"))
 
-    def update_table_data(self): #aaaaf
+    def update_table_data(self):  # aaaaf
         self.database1()
 
     def set_access_level(self, access_level):
@@ -271,6 +275,7 @@ class Ui_MainWindow(object):
                     should_show_row = True
                     break
             self.tableWidget.setRowHidden(row, not should_show_row)
+
     def show_post(self):
         self.ui = sell.Ui_Dialog()
         data = self.ui.exec_()
@@ -345,16 +350,6 @@ class Ui_MainWindow(object):
     #         except Exception as e:
     #             print(f"Не удалось открыть файл {fileName}. Ошибка: {e}")
 
-    # def open_documents(self):
-    #     # Показать диалог выбора операции
-    #     operations = ["Продажа", "Перемещение", "Списание", "Приемка"]
-    #     operation, ok = QtWidgets.QInputDialog.getItem(None, "Выберите операцию", "Операция:", operations, 0, False)
-    #     if ok and operation:
-    #         try:
-    #             generate_document(operation)
-    #         except Exception as e:
-    #             QtWidgets.QMessageBox.critical(None, "Ошибка", f"Не удалось создать документ. Ошибка: {e}")
-
     def database1(self):
         self.conn = sqlite3.connect('srm.db')
         self.c = self.conn.cursor()
@@ -372,6 +367,38 @@ class Ui_MainWindow(object):
 
             headers = [description[0] for description in self.c.description]
             self.tableWidget.setHorizontalHeaderLabels(headers)
+
+        self.setup_completer()  # Настроим комплитер для строки поиска
+
+    def apply_filter_and_highlight(self):
+        search_text = self.lineEdit.text().strip().lower()
+        completer = self.lineEdit.completer()
+        completer_model = completer.model()
+        completer_model.setStringList([])  # Очистим список для комплитера
+
+        for row in range(self.tableWidget.rowCount()):
+            for col in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item_text = item.text().lower()
+                    if search_text in item_text:
+                        if item.text() not in completer_model.stringList():
+                            completer_model.insertRow(completer_model.rowCount())
+                            completer_model.setData(completer_model.index(completer_model.rowCount() - 1), item.text())
+                        start_pos = item_text.index(search_text)
+                        end_pos = start_pos + len(search_text)
+                        item.setBackground(QtGui.QBrush(QtGui.QColor("yellow")))
+                    else:
+                        item.setBackground(QtGui.QBrush(QtGui.QColor("white")))
+
+    def setup_completer(self):
+        self.completer = QtWidgets.QCompleter()
+        self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.completer.setFilterMode(QtCore.Qt.MatchContains)
+        self.lineEdit.setCompleter(self.completer)
+
+        self.completer_model = QtCore.QStringListModel()
+        self.completer.setModel(self.completer_model)
 
     def show_transaction_details(self, row, column):
         try:
@@ -399,6 +426,3 @@ if __name__ == "__main__":
 
     ui.set_access_level('admin')
     sys.exit(app.exec_())
-
-
-

@@ -195,7 +195,6 @@ class Ui_MainWindow(object):
         self.main_window.close()
 
 
-
 if __name__ == "__main__":
     import sys
 

@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(QtCore.QObject):
     data_added = QtCore.pyqtSignal(str, str, str, str, str)
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(739, 461)
@@ -80,8 +81,10 @@ class Ui_MainWindow(QtCore.QObject):
         # self.lineEdit_6.clear()
         self.centralwidget.window().close()
 
+
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
